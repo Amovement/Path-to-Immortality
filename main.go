@@ -21,9 +21,14 @@ func registerChallengeCallbacks(core *internal.Core) {
 	js.Global().Set("joinChallenge", js.FuncOf(core.JoinChallenge))
 }
 
+func registerVersionCallbacks(core *internal.Core) {
+	js.Global().Set("getVersion", js.FuncOf(core.GetVersion))
+}
+
 func main() {
 	core := internal.NewCore()
 	registerUserCallbacks(core)
 	registerChallengeCallbacks(core)
+	registerVersionCallbacks(core)
 	<-make(chan struct{}) // 保持运行
 }

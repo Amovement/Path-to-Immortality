@@ -56,6 +56,7 @@ func (s *UserService) GetUserInfo() types.GetUserInfoResp {
 		Potential:           user.Potential,
 		Cultivation:         utils.GetCultivationByLevel(int(user.Level)),
 		NextCultivationTime: time.Unix(user.NextCultivationTime, 0).Format("2006-01-02 15:04:05"),
+		Level:               user.Level,
 	}
 }
 
@@ -97,7 +98,7 @@ func (s *UserService) Allocate(stat string) string {
 	case "speed":
 		user.Speed = user.Speed + 1
 	default:
-		return "stat 不存在"
+		return "属性不存在"
 	}
 	user.Potential = user.Potential - 1
 	updateUserInfo(user)
@@ -117,11 +118,14 @@ func (s *UserService) Heal() string {
 	defer CacheRedis.Delete(key)
 
 	user := getLocalUser()
+	if user.Hp >= user.HpLimit {
+		return "当前已经很健康了"
+	}
 
 	endTime := user.NextCultivationTime // 治疗和修炼占用同一个时间
 	// 需要检查一下时间能不能治疗
 	if time.Now().Unix() <= endTime {
-		return "累了, 暂时无法进行这个操作"
+		return "累了, 暂时无法进行这个操作. 下一次可操作时间: " + time.Unix(endTime, 0).Format("2006-01-02 15:04:05")
 	}
 
 	// 设置下次可操作时间为5分钟后
@@ -135,7 +139,7 @@ func (s *UserService) Heal() string {
 	}
 	updateUserInfo(user)
 
-	return "恢复成功"
+	return "恢复成功! 下一次可修炼/恢复时间点: " + time.Unix(endTime, 0).Format("2006-01-02 15:04:05")
 }
 
 func (s *UserService) Cultivation() string {
@@ -151,7 +155,7 @@ func (s *UserService) Cultivation() string {
 	endTime := user.NextCultivationTime
 	// 需要检查一下时间能不能修炼
 	if time.Now().Unix() <= endTime {
-		return "累了, 暂时无法进行这个操作"
+		return "累了, 暂时无法进行这个操作. 下一次可操作时间: " + time.Unix(endTime, 0).Format("2006-01-02 15:04:05")
 	}
 
 	endTime = time.Now().Add(utils.GetRandomMinutes(1, int(user.Level))).Unix()
@@ -167,5 +171,5 @@ func (s *UserService) Cultivation() string {
 	// 更新用户
 	updateUserInfo(user)
 
-	return "下一次可修炼时间点: " + time.Unix(endTime, 0).Format("2006-01-02 15:04:05")
+	return "修炼成功! 下一次可修炼/恢复时间点: " + time.Unix(endTime, 0).Format("2006-01-02 15:04:05")
 }

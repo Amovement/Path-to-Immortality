@@ -35,7 +35,8 @@ type GetUserInfoResp struct {
 	Hp                  int64  `json:"hp"`                  // 生命
 	HpLimit             int64  `json:"hpLimit"`             // 最大生命
 	Exp                 int64  `json:"exp"`                 // 经验
-	Cultivation         string `json:"level"`               // 修为, 与等级挂钩
+	Cultivation         string `json:"cultivation"`         // 修为, 与等级挂钩
+	Level               int64  `json:"level"`               // 等级
 	Gold                int64  `json:"gold"`                // 金币
 	Potential           int64  `json:"potential"`           // 潜能
 	NextCultivationTime string `json:"nextCultivationTime"` // 下次修炼和治疗时间
@@ -64,6 +65,8 @@ type ListChallengeItem struct {
 	Title       string    `json:"title"`
 	MonsterList []Monster `json:"monster"`
 	Reward      string    `json:"reward"`
+	Description string    `json:"description"`
+	LevelLimit  int64     `json:"levelLimit"`
 }
 
 type ListChallengeReq struct {

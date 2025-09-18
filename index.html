@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path-to-Immortality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#818cf8',
+                        secondary: '#4ade80',
+                        accent: '#fbbf24',
+                        danger: '#f87171',
+                        dark: {
+                            100: '#111827',
+                            200: '#1f2937',
+                            300: '#374151',
+                            400: '#4b5563',
+                            500: '#6b7280',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            }
+            .low-key-hover {
+                transition: all 0.2s ease;
+            }
+            .low-key-hover:hover {
+                transform: scale(1.02);
+            }
+        }
+    </style>
+</head>
+<body class="bg-dark-100 min-h-screen font-sans text-gray-200">
+<div id="wasmLoader" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div class="bg-dark-200 p-6 rounded-xl text-center border border-dark-300">
+        <i class="fa fa-cogs text-primary text-4xl mb-4 animate-spin"></i>
+        <h3 class="text-xl font-bold mb-2">加载中</h3>
+        <p class="text-dark-400">请稍候...</p>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-6 max-w-6xl" id="mainContent">
+    <header class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-primary">Path to Immortality</h1>
+        <p class="text-dark-400" id="versionTag"></p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- 用户信息面板 -->
+        <div class="lg:col-span-1">
+            <div class="bg-dark-200 rounded-xl p-5 card-shadow low-key-hover border border-dark-300">
+                <h2 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fa fa-user-circle text-primary mr-2"></i>用户信息
+                </h2>
+
+                <div id="userInfo" class="space-y-3">
+                    <div class="flex justify-between pb-2 border-b border-dark-300">
+                        <span class="text-dark-400">用户名:</span>
+                        <span id="username">未设置</span>
+                    </div>
+                    <div class="flex justify-between pb-2 border-b border-dark-300">
+                        <span class="text-dark-400">修为:</span>
+                        <span id="cultivation">灵智未启</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">体魄:</span>
+                        <span id="hp">10/10</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">攻击:</span>
+                        <span id="attack">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">防御:</span>
+                        <span id="defense">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">速度:</span>
+                        <span id="speed">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">潜能:</span>
+                        <span id="potential">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">经验:</span>
+                        <span id="exp">0</span>
+                    </div>
+
+                </div>
+
+                <div class="mt-5">
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="newUsername" placeholder="输入用户名"
+                               class="flex-1 px-3 py-2 bg-dark-100 border border-dark-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
+                        <button onclick="setUsernameBtn()"
+                                class="bg-primary/80 text-gray-100 px-3 py-2 rounded-lg hover:bg-primary transition-colors">
+                            设置
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 修炼功能面板 -->
+            <div class="bg-dark-200 rounded-xl p-5 card-shadow mt-5 low-key-hover border border-dark-300">
+
+                <div class="space-y-2">
+                    <button onclick="healBtn()"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-heartbeat"></i>恢复健康
+                    </button>
+
+                    <button onclick="cultivationBtn()"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-level-up"></i>潜心修炼
+                    </button>
+
+                    <button onclick="allocateBtn('hpLimit')"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-child"></i>提升体魄
+                    </button>
+
+                    <button onclick="allocateBtn('attack')"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-superpowers"></i>提升攻击
+                    </button>
+
+                    <button onclick="allocateBtn('defense')"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-shield"></i>提升防御
+                    </button>
+
+                    <button onclick="allocateBtn('speed')"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-bolt"></i>提升速度
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 挑战面板 -->
+        <div class="lg:col-span-2">
+            <div class="bg-dark-200 rounded-xl p-5 card-shadow low-key-hover border border-dark-300 h-full">
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-lg font-bold flex items-center">
+                        <i class="fa fa-trophy text-accent mr-2"></i>挑战系统
+                    </h2>
+                    <button onclick="listChallengeBtn()"
+                            class="bg-dark-100 text-dark-400 px-3 py-1.5 rounded-lg hover:bg-dark-300 transition-colors flex items-center gap-1">
+                        <i class="fa fa-refresh"></i>刷新挑战
+                    </button>
+                </div>
+
+                <div id="challengeList" class="space-y-3 bg-dark-100 p-3 rounded-lg h-64 overflow-y-auto border border-dark-300">
+                    <div class="text-center text-dark-400 py-8">
+                        <i class="fa fa-spinner fa-spin text-xl mb-2"></i>
+                        <p>点击刷新按钮加载挑战</p>
+                    </div>
+                </div>
+
+
+                <!-- 挑战日志 -->
+                <div class="mt-6">
+                    <h3 class="text-base font-semibold mb-2 flex items-center text-dark-400">
+                        <i class="fa fa-history mr-2"></i>日志
+                    </h3>
+                    <div id="challengeLog" class="bg-dark-100 p-3 rounded-lg h-36 overflow-y-auto text-sm text-dark-400 border border-dark-300">
+                        <p class="italic">暂无记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 消息提示框 -->
+    <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 z-50 bg-dark-200 border border-dark-300">
+        <i id="toastIcon" class="fa fa-info-circle text-primary"></i>
+        <span id="toastMessage"></span>
+    </div>
+</div>
+
+<script src="wasm_exec.js"></script>
+<script>
+    // 初始化并加载WASM
+    async function initWasm() {
+        try {
+            // 1. 创建Go实例
+            const go = new Go();
+
+            // 2. 加载WASM文件（先转为ArrayBuffer确保兼容性）
+            const response = await fetch('main.wasm');
+            if (!response.ok) {
+                throw new Error(`加载失败: ${response.status} ${response.statusText}`);
+            }
+            const bytes = await response.arrayBuffer();
+
+            // 3. 实例化并运行WASM
+            const result = await WebAssembly.instantiate(bytes, go.importObject);
+            go.run(result.instance);
+
+            // 4. 标记加载完成
+            wasmLoaded = true;
+            console.log("WASM模块已就绪");
+
+            // 隐藏加载提示，显示内容
+            document.getElementById('wasmLoader').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('mainContent').classList.remove('wasm-loading');
+            refreshUserInfo();
+            showVersion();
+            // 初始化完成后获取用户信息
+            setTimeout(refreshUserInfo, 500);
+            setTimeout(showVersion,2000);
+            showToast('修炼系统加载完成，欢迎使用！');
+        } catch (error)  {
+            console.error('Wasm初始化失败:', error);
+            const loader = document.getElementById('wasmLoader');
+            loader.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl text-center">
+                        <i class="fa fa-exclamation-triangle text-danger text-4xl mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2 text-danger">加载失败</h3>
+                        <p class="text-gray-600 mb-4">Wasm模块初始化出错</p>
+                        <button onclick="initWasm()" class="bg-primary text-white px-4 py-2 rounded-lg">
+                            重试
+                        </button>
+                    </div>
+                `;
+        }
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        initWasm();
+    });
+
+    function showVersion(){
+        const version = getVersion(); // string
+        document.getElementById('versionTag').textContent = version;
+    }
+
+    // 显示提示消息
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+
+        toastMessage.textContent = message;
+
+        if (isError) {
+            toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-2 z-50 bg-dark-200 border border-danger/30';
+            toastIcon.className = 'fa fa-exclamation-circle text-danger';
+        } else {
+            toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-2 z-50 bg-dark-200 border border-dark-300';
+            toastIcon.className = 'fa fa-check-circle text-secondary';
+        }
+
+        setTimeout(() => {
+            toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 z-50 bg-dark-200 border border-dark-300';
+        }, 5000);
+    }
+
+    // 用户信息相关函数
+    function refreshUserInfo() {
+        try {
+            if (typeof getUserInfo !== 'function') {
+                showToast('接口未加载', true);
+                return;
+            }
+
+            const userInfoStr = getUserInfo();
+            const userInfo = JSON.parse(userInfoStr);
+
+            // Gold  int64  `json:"gold"` todo
+            document.getElementById('username').textContent = userInfo.username || '未设置';
+            document.getElementById('cultivation').textContent = userInfo.cultivation ;
+            document.getElementById('hp').textContent = userInfo.hp + '/' + userInfo.hpLimit;
+            document.getElementById('attack').textContent = userInfo.attack || '0';
+            document.getElementById('defense').textContent = userInfo.defense || '0';
+            document.getElementById('speed').textContent = userInfo.speed || '0';
+            document.getElementById('exp').textContent = userInfo.exp  + '/' + userInfo.level*10; // 转为数字
+            document.getElementById('potential').textContent = userInfo.potential || '0';
+
+            showToast('信息已刷新');
+        } catch (e) {
+            showToast('获取信息失败: ' + e.message, true);
+        }
+    }
+
+    async function setUsernameBtn() {
+        const newUsername = document.getElementById('newUsername').value.trim();
+        if (!newUsername) {
+            showToast('请输入用户名', true);
+            return;
+        }
+
+        try {
+            if (typeof setUsername !== 'function') {
+                showToast('接口未加载', true);
+                return;
+            }
+
+            setUsername(newUsername);
+            document.getElementById('newUsername').value = '';
+            refreshUserInfo();
+            showToast('用户名已更新');
+        } catch (e) {
+            showToast('设置失败: ' + e.message, true);
+        }
+    }
+
+    // 分配属性点
+    async function allocateBtn(stat) {
+        try {
+            if (typeof allocate !== 'function') {
+                showToast('接口未加载', true);
+                return;
+            }
+
+            const result = allocate(stat);
+            refreshUserInfo();
+            showToast(result);
+            addToLog(`分配潜能点: ${result}`);
+        } catch (e) {
+            showToast('操作失败: ' + e.message, true);
+        }
+    }
+
+    async function healBtn() {
+        try {
+            if (typeof heal !== 'function') {
+                showToast('接口未加载', true);
+                return;
+            }
+
+            const result = heal();
+            refreshUserInfo();
+            showToast(result);
+            addToLog(`恢复健康: ${result}`);
+        } catch (e) {
+            showToast('操作失败: ' + e.message, true);
+        }
+    }
+
+    async function cultivationBtn() {
+        try {
+            if (typeof cultivation !== 'function') {
+                showToast('接口未加载', true);
+                return;
+            }
+
+            const result = cultivation();
+            showToast(result);
+            refreshUserInfo();
+            addToLog(`修炼结果: ${result}`);
+        } catch (e) {
+            showToast('操作失败: ' + e.message, true);
+        }
+    }
+
+    // 挑战相关函数
+    async function listChallengeBtn() {
+        try {
+            // 1. 先检查Wasm接口是否加载成功
+            if (typeof listChallenge !== 'function') {
+                showToast('挑战接口未加载，请稍后重试', true);
+                return;
+            }
+
+            // 2. 调用Wasm接口获取数据
+            const rawData = listChallenge();
+            let challengeData = null;
+
+            // 3. 解析JSON数据（处理可能的解析错误）
+            try {
+                challengeData = JSON.parse(rawData);
+                console.log('获取到的挑战数据:', challengeData); // 调试用，可删除
+            } catch (jsonErr) {
+                showToast('挑战数据解析失败', true);
+                console.error('JSON解析错误:', jsonErr, '原始数据:', rawData);
+                return;
+            }
+
+            // 4. 提取核心的list数组（关键修复：适配{list: Array}格式）
+            let challengeList = [];
+            // 先判断是否是对象，且包含list属性，且list是数组
+            if (typeof challengeData === 'object' && challengeData !== null && Array.isArray(challengeData.list)) {
+                challengeList = challengeData.list; // 从对象中提取真正的数组
+            } else {
+                showToast('挑战数据格式异常', true);
+                console.warn('预期数据格式是{list: Array}，实际是:', challengeData);
+                return;
+            }
+
+            // 5. 渲染挑战列表
+            const challengeListElement = document.getElementById('challengeList');
+            if (challengeList.length === 0) {
+                challengeListElement.innerHTML = `
+                <div class="text-center text-dark-400 py-8">
+                    <i class="fa fa-frown-o text-xl mb-2"></i>
+                    <p>暂无可用挑战</p>
+                </div>
+            `;
+                return;
+            }
+
+            // 6. 循环生成挑战项（给每个属性加默认值，避免缺失属性报错）
+            let html = '';
+            challengeList.forEach((challenge, index) => {
+                const id = challenge.id || `default-${index}`; // 用索引当默认ID，避免空值
+                const name = challenge.title || `未知挑战-${index + 1}`;
+                const reward = challenge.reward || '无奖励';
+                const description = challenge.description || '暂无挑战描述';
+
+                html += `
+                <div class="border border-dark-300 rounded-lg p-4 hover:border-primary/50 transition-colors">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold">${name}</h3>
+                            <p class="text-dark-400 text-sm">奖励: ${reward}</p>
+                        </div>
+                        <button onclick="joinChallengeBtn(${id})"
+                            class="bg-accent/20 text-accent px-3 py-1 rounded hover:bg-accent/30 transition-colors text-sm">
+                            接受挑战
+                        </button>
+                    </div>
+                    <p class="mt-2 text-dark-400 text-sm whitespace-pre-line">${description}</p>
+                </div>
+            `;
+            });
+
+            challengeListElement.innerHTML = html;
+            showToast(`已加载 ${challengeList.length} 个挑战`);
+        } catch (e) {
+            showToast('获取挑战列表失败: ' + e.message, true);
+            console.error('挑战列表加载异常:', e);
+        }
+    }
+
+    async function joinChallengeBtn(challengeId) {
+        try {
+            if (typeof joinChallenge !== 'function') {
+                showToast('接口未加载', true);
+                return;
+            }
+
+            const result = joinChallenge(challengeId);
+            console.log('加入挑战结果:', result);
+            showToast(result.msg);
+            refreshUserInfo();
+
+            if (result.log) {
+                addToLog(result.log);
+            }
+        } catch (e) {
+            showToast('加入挑战失败: ' + e.message, true);
+        }
+    }
+
+    // 辅助函数
+    function getDifficultyLabel(difficulty) {
+        switch(difficulty) {
+            case 1: return '<span class="text-green-400 bg-green-900/30 px-2 py-0.5 rounded-full text-xs">简单</span>';
+            case 2: return '<span class="text-yellow-400 bg-yellow-900/30 px-2 py-0.5 rounded-full text-xs">中等</span>';
+            case 3: return '<span class="text-orange-400 bg-orange-900/30 px-2 py-0.5 rounded-full text-xs">困难</span>';
+            case 4: return '<span class="text-red-400 bg-red-900/30 px-2 py-0.5 rounded-full text-xs">史诗</span>';
+            default: return '<span class="text-gray-400 bg-gray-800/30 px-2 py-0.5 rounded-full text-xs">未知</span>';
+        }
+    }
+
+    function addToLog(message) {
+        const logElement = document.getElementById('challengeLog');
+        const timestamp = new Date().toLocaleTimeString();
+
+        if (logElement.innerHTML.includes('暂无记录')) {
+            logElement.innerHTML = '';
+        }
+
+        logElement.innerHTML += `
+                <div class="mb-1 pb-1 border-b border-dark-300 whitespace-pre-line">
+                    <span class="text-dark-500">[${timestamp}]</span>
+                    <span class="ml-2">${message}</span>
+                </div>
+            `;
+
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+</script>
+</body>
+</html>

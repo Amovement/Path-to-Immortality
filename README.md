@@ -1,2 +1,11 @@
-# Path-to-Immortality-WASM
+# Path-to-Immortality
 WASM 挂机修仙小游戏
+
+### 介绍
+这是一个基于 wasm 浏览器环境下的挂机修仙小游戏, 上班摸鱼🐟。欢迎提交 bug。
+
+### todo
+- 任务线
+- 数值优化
+- 金币提升属性
+- 更多可玩性...

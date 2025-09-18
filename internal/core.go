@@ -10,12 +10,14 @@ import (
 )
 
 type Core struct {
+	VersionService   *service.VersionService
 	ChallengeService *service.ChallengeService
 	UserService      *service.UserService
 }
 
 func NewCore() *Core {
 	return &Core{
+		VersionService:   service.NewVersionService(),
 		ChallengeService: service.NewChallengeService(),
 		UserService:      service.NewUserService(),
 	}
@@ -70,4 +72,8 @@ func (c *Core) Heal(this js.Value, args []js.Value) interface{} {
 func (c *Core) Cultivation(this js.Value, args []js.Value) interface{} {
 	resp := c.UserService.Cultivation()
 	return resp
+}
+
+func (c *Core) GetVersion(this js.Value, args []js.Value) interface{} {
+	return c.VersionService.GetVersion()
 }

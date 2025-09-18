@@ -34,8 +34,13 @@ func NewChallengeService() *ChallengeService {
 func (s *ChallengeService) ListChallenge() (types.ListChallengeResp, error) {
 	var res []types.ListChallengeItem
 
+	user := getLocalUser()
+
 	// 遍历所有挑战ID，加载每个挑战的详细信息
 	for _, challengeId := range s.ChallengeList {
+		if user.Level > challengeId.LevelLimit || challengeId.LevelLimit-user.Level >= 30 {
+			continue
+		}
 		c, err := s.LoadChallenge(challengeId.ID)
 		if err != nil {
 			fmt.Printf("[ERROR] load challenge error: %+v\n", err)
@@ -89,6 +94,13 @@ func (s *ChallengeService) LoadChallenge(challengeId uint) (types.ListChallengeI
 
 	// 构造奖励字符串
 	rewards := fmt.Sprintf("金币 %d 枚", challenge.Gold)
+	description := "挑战内容: \n" // 怪物群的描述
+	for _, monster := range monsters {
+		description = description + fmt.Sprintf(" [%s-%s]", monster.Name, monster.Cultivation)
+		description = description + fmt.Sprintf("体魄: %d/%d ", monster.Hp, monster.HpLimit)
+		description = description + fmt.Sprintf("攻击: %d 防御: %d ", monster.Attack, monster.Defense)
+		description = description + fmt.Sprintf("速度: %d \n", monster.Speed)
+	}
 
 	// 组装最终的挑战项结果
 	res := types.ListChallengeItem{
@@ -96,6 +108,8 @@ func (s *ChallengeService) LoadChallenge(challengeId uint) (types.ListChallengeI
 		Reward:      rewards,
 		Title:       challenge.Title,
 		ID:          challenge.ID,
+		Description: description,
+		LevelLimit:  challenge.LevelLimit,
 	}
 
 	return res, nil
@@ -127,6 +141,14 @@ func (s *ChallengeService) JoinChallenge(ChallengeId int) (string, string) {
 		return "内部错误...", ""
 	}
 	user := getLocalUser()
+
+	if user.Level > challenge.LevelLimit {
+		return "不要以大欺小啊", "不要以大欺小啊"
+	}
+	if challenge.LevelLimit-user.Level >= 30 {
+		return "修为不足", "修为不足"
+	}
+
 	msg, fightLog := s.fightCore(user, challenge.MonsterList)
 	if msg == fightWin {
 		user.Gold = user.Gold + challengeCache.Gold
@@ -178,7 +200,7 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 	for _, monster := range monsterStates {
 		logMsg += " " + monster.Name
 	}
-	logMsg += " 战斗开始了！"
+	logMsg += " 战斗开始了！\n"
 
 	// 2. 战斗主循环（直到玩家死亡或所有怪物死亡）
 	for {
