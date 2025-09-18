@@ -13,6 +13,7 @@ type Core struct {
 	VersionService   *service.VersionService
 	ChallengeService *service.ChallengeService
 	UserService      *service.UserService
+	GoodsService     *service.GoodsService
 }
 
 func NewCore() *Core {
@@ -20,7 +21,23 @@ func NewCore() *Core {
 		VersionService:   service.NewVersionService(),
 		ChallengeService: service.NewChallengeService(),
 		UserService:      service.NewUserService(),
+		GoodsService:     service.NewGoodsService(),
 	}
+}
+
+// ------------ 商品类 ---------------------
+
+func (c *Core) BuyGoods(this js.Value, args []js.Value) interface{} {
+	goodsId := args[0].Int()
+	msg := c.GoodsService.BuyGoods(goodsId)
+	bytesData, _ := json.Marshal(msg)
+	return string(bytesData)
+}
+
+func (c *Core) GetGoodsList(this js.Value, args []js.Value) interface{} {
+	goods := c.GoodsService.GetGoodsList()
+	bytesData, _ := json.Marshal(goods)
+	return string(bytesData)
 }
 
 // ------------ 挑战类 ---------------------
@@ -74,6 +91,7 @@ func (c *Core) Cultivation(this js.Value, args []js.Value) interface{} {
 	return resp
 }
 
+// ------------ 版本类 ---------------------
 func (c *Core) GetVersion(this js.Value, args []js.Value) interface{} {
 	return c.VersionService.GetVersion()
 }

@@ -197,14 +197,28 @@ var challengeMonsters = []model.ChallengeMonster{
 	{ChallengeID: 51, MonsterID: 45, Count: 1}, {ChallengeID: 51, MonsterID: 42, Count: 1}, {ChallengeID: 51, MonsterID: 39, Count: 1},
 }
 
+// Goods 商品
+var Goods = []model.Goods{
+	{ID: 1, Name: "淬体丹", Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险"},
+	{ID: 2, Name: "莽牛血", Price: 50, Description: "增加一点攻击，存在灵力反噬风险"},
+	{ID: 3, Name: "玄龟甲", Price: 50, Description: "增加一点防御，存在灵力反噬风险"},
+	{ID: 4, Name: "灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险"},
+	{ID: 5, Name: "药渣", Price: 10, Description: "某次炼丹的残渣，效果非常混乱"},
+	{ID: 6, Name: "修为丹", Price: 20, Description: "增加五点经验"},
+	{ID: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复三十点生命值"},
+	{ID: 8, Name: "金币罐子", Price: 20, Description: "会获得随机数量的金币"},
+}
+
 var MonsterMap map[uint]model.Monster
 var ChallengeMap map[uint]model.Challenge
 var ChallengeMonsterMap map[uint]model.ChallengeMonster
+var GoodsMap map[uint]model.Goods
 
 func init() {
 	MonsterMap = make(map[uint]model.Monster)
 	ChallengeMap = make(map[uint]model.Challenge)
 	ChallengeMonsterMap = make(map[uint]model.ChallengeMonster)
+	GoodsMap = make(map[uint]model.Goods)
 
 	for _, v := range monsters {
 		MonsterMap[v.ID] = v
@@ -216,4 +230,8 @@ func init() {
 		v.Monster = MonsterMap[v.MonsterID]
 		ChallengeMonsterMap[uint(ind+1)] = v
 	}
+	for _, v := range Goods {
+		GoodsMap[v.ID] = v
+	}
+
 }

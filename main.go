@@ -8,6 +8,11 @@ import (
 	"syscall/js"
 )
 
+func registerGoodsCallbacks(core *internal.Core) {
+	js.Global().Set("getGoodsList", js.FuncOf(core.GetGoodsList))
+	js.Global().Set("buyGoods", js.FuncOf(core.BuyGoods))
+}
+
 func registerUserCallbacks(core *internal.Core) {
 	js.Global().Set("getUserInfo", js.FuncOf(core.GetUserInfo))
 	js.Global().Set("setUsername", js.FuncOf(core.SetUsername))
@@ -30,5 +35,6 @@ func main() {
 	registerUserCallbacks(core)
 	registerChallengeCallbacks(core)
 	registerVersionCallbacks(core)
+	registerGoodsCallbacks(core)
 	<-make(chan struct{}) // 保持运行
 }

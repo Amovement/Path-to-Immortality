@@ -15,3 +15,11 @@ func GetChallengeMonsterMap() map[uint]model.ChallengeMonster {
 func GetChallengeList() []model.Challenge {
 	return Challenges
 }
+
+func GetGoodsList() []model.Goods {
+	return Goods
+}
+
+func GetGoodsMap() map[uint]model.Goods {
+	return GoodsMap
+}

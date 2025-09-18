@@ -1,6 +1,6 @@
 package service
 
-var version = "alpha-0.0.1"
+var version = "alpha-0.0.2"
 
 type VersionService struct {
 }

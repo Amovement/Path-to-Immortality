@@ -60,14 +60,17 @@
         <h1 class="text-2xl font-bold text-primary">Path to Immortality</h1>
         <p class="text-dark-400" id="versionTag"></p>
     </header>
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- 用户信息面板 -->
         <div class="lg:col-span-1">
             <div class="bg-dark-200 rounded-xl p-5 card-shadow low-key-hover border border-dark-300">
-                <h2 class="text-lg font-bold mb-4 flex items-center">
-                    <i class="fa fa-user-circle text-primary mr-2"></i>用户信息
-                </h2>
+                <!-- 原页面内容区域（示例按钮，用于打开商城） -->
+                <div class="">
+                    <h2 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fa fa-user-circle text-primary mr-2"></i>用户信息
+                    </h2>
+                </div>
+
 
                 <div id="userInfo" class="space-y-3">
                     <div class="flex justify-between pb-2 border-b border-dark-300">
@@ -155,23 +158,26 @@
             </div>
         </div>
 
-        <!-- 挑战面板 -->
+        <!-- 控制面板 -->
         <div class="lg:col-span-2">
             <div class="bg-dark-200 rounded-xl p-5 card-shadow low-key-hover border border-dark-300 h-full">
                 <div class="flex justify-between items-center mb-5">
                     <h2 class="text-lg font-bold flex items-center">
-                        <i class="fa fa-trophy text-accent mr-2"></i>挑战系统
+                        <i class="fa fa-chevron-down text-accent mr-2"></i>控制面板
                     </h2>
-                    <button onclick="listChallengeBtn()"
-                            class="bg-dark-100 text-dark-400 px-3 py-1.5 rounded-lg hover:bg-dark-300 transition-colors flex items-center gap-1">
-                        <i class="fa fa-refresh"></i>刷新挑战
+                    <button onclick="listChallengeBtn()" class="ml-auto btn btn-primary">
+                        <i class="fa fa-fire"></i>挑战
+                    </button>
+
+                    <button onclick="openShopModal()" class="ml-auto btn btn-primary">
+                        <i class="fa fa-shopping-bag"></i>集市
                     </button>
                 </div>
 
-                <div id="challengeList" class="space-y-3 bg-dark-100 p-3 rounded-lg h-64 overflow-y-auto border border-dark-300">
+                <div id="challengeList" class="space-y-3 bg-dark-100 p-3 rounded-lg h-96 overflow-y-auto border border-dark-300">
                     <div class="text-center text-dark-400 py-8">
                         <i class="fa fa-spinner fa-spin text-xl mb-2"></i>
-                        <p>点击刷新按钮加载挑战</p>
+                        <p>点击集市或挑战按钮加载</p>
                     </div>
                 </div>
 
@@ -181,7 +187,7 @@
                     <h3 class="text-base font-semibold mb-2 flex items-center text-dark-400">
                         <i class="fa fa-history mr-2"></i>日志
                     </h3>
-                    <div id="challengeLog" class="bg-dark-100 p-3 rounded-lg h-36 overflow-y-auto text-sm text-dark-400 border border-dark-300">
+                    <div id="challengeLog" class="bg-dark-100 p-3 rounded-lg h-48 overflow-y-auto text-sm text-dark-400 border border-dark-300">
                         <p class="italic">暂无记录</p>
                     </div>
                 </div>
@@ -197,6 +203,127 @@
 </div>
 
 <script src="wasm_exec.js"></script>
+<script>
+    // 加载商品
+    function openShopModal() {
+        // 获取商品列表
+        loadAllGoods(); // 加载所有商品
+    }
+
+    // 从Wasm加载所有商品
+    function loadAllGoods() {
+        try {
+            // 调用Wasm暴露的获取商品列表的函数
+            if (typeof getGoodsList !== 'function') {
+                showToast('商品接口未加载', true);
+                return;
+            }
+
+            const goodsListStr = getGoodsList();
+            const goodsList = JSON.parse(goodsListStr);
+
+            // 检查是否是数组
+            if (!Array.isArray(goodsList)) {
+                showToast('商品数据格式错误', true);
+                console.error('商品数据不是数组:', goodsList);
+                return;
+            }
+
+            renderGoodsList(goodsList);
+        } catch (e) {
+            showToast('加载商品失败: ' + e.message, true);
+            console.error('加载商品错误:', e);
+            // 显示错误状态
+            document.getElementById('goodsList').innerHTML = `
+                    <div class="text-center text-dark-400 py-10">
+                        <i class="fa fa-exclamation-triangle text-danger text-xl mb-2"></i>
+                        <p>无法加载商品，请重试</p>
+                        <button onclick="loadAllGoods()" class="mt-2 text-primary text-sm hover:underline">
+                            重试
+                        </button>
+                    </div>
+                `;
+        }
+    }
+
+    // 渲染商品列表
+    function renderGoodsList(goodsList) {
+        const goodsListElement = document.getElementById('challengeList');
+
+        if (goodsList.length === 0) {
+            goodsListElement.innerHTML = `
+                    <div class="text-center text-dark-400 py-10">
+                        <i class="fa fa-frown-o text-xl mb-2"></i>
+                        <p>当前暂无商品</p>
+                    </div>
+                `;
+            return;
+        }
+
+        let html = '';
+        goodsList.forEach(goods => {
+            // 从Goods结构体获取属性，添加默认值
+            const id = goods.id || 0;
+            const name = goods.name || '未知商品';
+            const description = goods.description || '暂无描述';
+            const price = goods.price || 0;
+
+            // 根据商品名称自动选择图标（可根据实际情况调整）
+            let iconClass = 'fa-cube'; // 默认图标
+            if (name.includes('丹') || name.includes('药') || name.includes('血')) iconClass = 'fa-flask';
+            if (name.includes('剑') || name.includes('刀') || name.includes('武器')) iconClass = 'fa-sword';
+            if (name.includes('甲') || name.includes('皮') || name.includes('防')) iconClass = 'fa-shield';
+            if (name.includes('书') || name.includes('秘籍') || name.includes('心法')) iconClass = 'fa-book';
+
+            html += `
+                    <div class="flex flex-col md:flex-row gap-4 p-4 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
+                        <div class="w-full md:w-24 h-24 bg-dark-300 rounded flex items-center justify-center">
+                            <i class="fa ${iconClass} text-3xl text-accent"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="font-bold">${name}</h3>
+                                <span class="text-secondary font-medium">${price} 金</span>
+                            </div>
+                            <p class="text-dark-400 text-sm mt-1 whitespace-pre-line">
+                                ${description}
+                            </p>
+                            <div class="mt-3 flex justify-end">
+                                <button onclick="buyGoodsBtn(${id})" class="bg-primary/80 text-gray-100 px-3 py-1 rounded hover:bg-primary text-sm transition-colors">
+                                    <i class="fa fa-shopping-cart mr-1"></i>购买
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        });
+
+        goodsListElement.innerHTML = html;
+        showToast(`已加载 ${goodsList.length} 个商品`);
+    }
+
+    // 购买商品
+    function buyGoodsBtn(goodsId) {
+        try {
+            // 调用Wasm的购买接口
+            if (typeof buyGoods !== 'function') {
+                console.log('buyGoods is not a function')
+                return;
+            }
+
+            // 调用购买函数，传入商品ID
+            const result = buyGoods(goodsId);
+
+            // 返回格式为 '"金币不足"'
+            addToLog(`购买结果: ${result}`);
+            refreshUserInfo(); // 刷新用户信息
+            showToast(result,true);
+        } catch (e) {
+            showToast('购买失败: ' + e.message, true);
+            console.error('购买商品错误:', e);
+        }
+    }
+</script>
 <script>
     // 初始化并加载WASM
     async function initWasm() {
@@ -461,12 +588,12 @@
 
             const result = joinChallenge(challengeId);
             console.log('加入挑战结果:', result);
-            showToast(result.msg);
             refreshUserInfo();
 
             if (result.log) {
                 addToLog(result.log);
             }
+            showToast(result.msg);
         } catch (e) {
             showToast('加入挑战失败: ' + e.message, true);
         }
