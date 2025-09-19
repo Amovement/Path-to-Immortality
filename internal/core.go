@@ -29,9 +29,7 @@ func NewCore() *Core {
 
 func (c *Core) BuyGoods(this js.Value, args []js.Value) interface{} {
 	goodsId := args[0].Int()
-	msg := c.GoodsService.BuyGoods(goodsId)
-	bytesData, _ := json.Marshal(msg)
-	return string(bytesData)
+	return c.GoodsService.BuyGoods(goodsId)
 }
 
 func (c *Core) GetGoodsList(this js.Value, args []js.Value) interface{} {
@@ -62,6 +60,11 @@ func (c *Core) JoinChallenge(this js.Value, args []js.Value) interface{} {
 }
 
 // ------------- user 类 -----------------
+
+func (c *Core) GetGold(this js.Value, args []js.Value) interface{} {
+	return c.UserService.GetGold()
+}
+
 func (c *Core) GetUserInfo(this js.Value, args []js.Value) interface{} {
 	userInfo := c.UserService.GetUserInfo()
 	bytesData, _ := json.Marshal(userInfo)

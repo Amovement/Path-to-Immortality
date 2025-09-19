@@ -56,9 +56,9 @@
 </div>
 
 <div class="container mx-auto px-4 py-6 max-w-6xl" id="mainContent">
-    <header class="text-center mb-6">
+    <header class="flex justify-center items-center gap-3 mb-6">
         <h1 class="text-2xl font-bold text-primary">Path to Immortality</h1>
-        <p class="text-dark-400" id="versionTag"></p>
+        <p class="text-dark-400 text-xs" id="versionTag">v1.0.0</p>
     </header>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- 用户信息面板 -->
@@ -105,15 +105,19 @@
                         <span class="text-dark-400">经验:</span>
                         <span id="exp">0</span>
                     </div>
+                    <div class="flex justify-between">
+                        <span class="text-dark-400">金币:</span>
+                        <span id="gold">0</span>
+                    </div>
 
                 </div>
 
-                <div class="mt-5">
-                    <div class="flex gap-2 mb-3">
+                <div class="mt-4">
+                    <div class="flex gap-2 mb-2">
                         <input type="text" id="newUsername" placeholder="输入用户名"
-                               class="flex-1 px-3 py-2 bg-dark-100 border border-dark-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
+                               class="flex-1 px-2 py-1.5 bg-dark-100 border border-dark-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm">
                         <button onclick="setUsernameBtn()"
-                                class="bg-primary/80 text-gray-100 px-3 py-2 rounded-lg hover:bg-primary transition-colors">
+                                class="bg-primary/80 text-gray-100 px-2.5 py-1.5 rounded-lg hover:bg-primary transition-colors text-sm">
                             设置
                         </button>
                     </div>
@@ -132,6 +136,11 @@
                     <button onclick="cultivationBtn()"
                             class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
                         <i class="fa fa-level-up"></i>潜心修炼
+                    </button>
+
+                    <button onclick="getGoldBtn()"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-money"></i>做工赚钱
                     </button>
 
                     <button onclick="allocateBtn('hpLimit')"
@@ -166,11 +175,11 @@
                         <i class="fa fa-chevron-down text-accent mr-2"></i>控制面板
                     </h2>
                     <button onclick="listChallengeBtn()" class="ml-auto btn btn-primary">
-                        <i class="fa fa-fire"></i>挑战
+                        <i class="fa fa-fire"></i>刷新挑战
                     </button>
 
                     <button onclick="openShopModal()" class="ml-auto btn btn-primary">
-                        <i class="fa fa-shopping-bag"></i>集市
+                        <i class="fa fa-shopping-bag"></i>刷新集市
                     </button>
                 </div>
 
@@ -201,6 +210,24 @@
         <span id="toastMessage"></span>
     </div>
 </div>
+<!-- 页面底部仓库地址区域（居中优化版） -->
+<footer class="container mx-auto px-4 py-4 mt-10 border-t border-dark-300">
+    <div class="flex flex-col items-center justify-center gap-2.5 text-sm text-dark-400">
+        <!-- 左侧说明文本（增加图标更生动） -->
+        <div class="flex items-center gap-2">
+            <i class="fa fa-gamepad text-primary/70"></i> <!-- 游戏图标 -->
+            <span>一个摸鱼🐟的小游戏 | Path-to-Immortality</span>
+        </div>
+        <!-- 右侧仓库链接（强化hover效果） -->
+        <a href="https://github.com/Amovement/Path-to-Immortality"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-dark-200 hover:text-primary transition-all duration-200">
+            <i class="fa fa-github text-lg"></i> <!-- 放大图标更醒目 -->
+            <span>仓库地址 Click Me</span>
+        </a>
+    </div>
+</footer>
 
 <script src="wasm_exec.js"></script>
 <script>
@@ -270,7 +297,7 @@
 
             // 根据商品名称自动选择图标（可根据实际情况调整）
             let iconClass = 'fa-cube'; // 默认图标
-            if (name.includes('丹') || name.includes('药') || name.includes('血')) iconClass = 'fa-flask';
+            if (name.includes('丹') || name.includes('药') || name.includes('血') || name.includes('散')) iconClass = 'fa-flask';
             if (name.includes('剑') || name.includes('刀') || name.includes('武器')) iconClass = 'fa-sword';
             if (name.includes('甲') || name.includes('皮') || name.includes('防')) iconClass = 'fa-shield';
             if (name.includes('书') || name.includes('秘籍') || name.includes('心法')) iconClass = 'fa-book';
@@ -413,7 +440,6 @@
             const userInfoStr = getUserInfo();
             const userInfo = JSON.parse(userInfoStr);
 
-            // Gold  int64  `json:"gold"` todo
             document.getElementById('username').textContent = userInfo.username || '未设置';
             document.getElementById('cultivation').textContent = userInfo.cultivation ;
             document.getElementById('hp').textContent = userInfo.hp + '/' + userInfo.hpLimit;
@@ -422,6 +448,7 @@
             document.getElementById('speed').textContent = userInfo.speed || '0';
             document.getElementById('exp').textContent = userInfo.exp  + '/' + userInfo.level*10; // 转为数字
             document.getElementById('potential').textContent = userInfo.potential || '0';
+            document.getElementById('gold').textContent = userInfo.gold || '0';
 
             showToast('信息已刷新');
         } catch (e) {
@@ -495,6 +522,17 @@
             showToast(result);
             refreshUserInfo();
             addToLog(`修炼结果: ${result}`);
+        } catch (e) {
+            showToast('操作失败: ' + e.message, true);
+        }
+    }
+
+    async function getGoldBtn() {
+        try {
+            const result = getGold();
+            showToast(result);
+            refreshUserInfo();
+            addToLog(`做工结果: ${result}`);
         } catch (e) {
             showToast('操作失败: ' + e.message, true);
         }

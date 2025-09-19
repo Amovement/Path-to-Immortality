@@ -32,6 +32,7 @@ type GetUserInfoResp struct {
 	Username            string `json:"username"`
 	Attack              int64  `json:"attack"`              // 攻击
 	Defense             int64  `json:"defense"`             // 防御
+	Speed               int64  `json:"speed"`               // 速度
 	Hp                  int64  `json:"hp"`                  // 生命
 	HpLimit             int64  `json:"hpLimit"`             // 最大生命
 	Exp                 int64  `json:"exp"`                 // 经验
@@ -40,6 +41,7 @@ type GetUserInfoResp struct {
 	Gold                int64  `json:"gold"`                // 金币
 	Potential           int64  `json:"potential"`           // 潜能
 	NextCultivationTime string `json:"nextCultivationTime"` // 下次修炼和治疗时间
+	PassedChallengeId   []uint `json:"passedChallengeId"`   // 通过的挑战 ID
 }
 
 type HealReq struct {

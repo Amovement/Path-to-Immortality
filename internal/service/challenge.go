@@ -35,10 +35,14 @@ func (s *ChallengeService) ListChallenge() (types.ListChallengeResp, error) {
 	var res []types.ListChallengeItem
 
 	user := getLocalUser()
+	userLevel := user.Level
+	if userLevel == 0 {
+		userLevel = 1
+	}
 
 	// 遍历所有挑战ID，加载每个挑战的详细信息
 	for _, challengeId := range s.ChallengeList {
-		if user.Level > challengeId.LevelLimit || challengeId.LevelLimit-user.Level >= 30 {
+		if challengeId.LevelLimit-userLevel >= 30 {
 			continue
 		}
 		c, err := s.LoadChallenge(challengeId.ID)
@@ -142,16 +146,19 @@ func (s *ChallengeService) JoinChallenge(ChallengeId int) (string, string) {
 	}
 	user := getLocalUser()
 
-	if user.Level > challenge.LevelLimit {
-		return "不要以大欺小啊", "不要以大欺小啊"
+	if lastPassedTime, existed := user.PassedChallengeTime[challenge.ID]; existed {
+		if time.Now().Format("2006-01-02") == lastPassedTime {
+			return "今日已经挑战过该项,请明日再来吧...", "今日已经挑战过该项,请明日再来吧..."
+		}
 	}
 	if challenge.LevelLimit-user.Level >= 30 {
-		return "修为不足", "修为不足"
+		return "修为不足", "修为不足，先去修炼一番吧..."
 	}
 
 	msg, fightLog := s.fightCore(user, challenge.MonsterList)
 	if msg == fightWin {
 		user.Gold = user.Gold + challengeCache.Gold
+		user = s.userPassChallenge(user, challenge.ID)
 		msg = msg + " 获得金币 " + fmt.Sprint(challengeCache.Gold) + " 枚"
 	} else if msg == fightLose {
 		// 掉 10% 经验惩罚 + 损失身上 10% 的金币
@@ -176,6 +183,26 @@ func (s *ChallengeService) JoinChallenge(ChallengeId int) (string, string) {
 	updateUserInfo(user)
 
 	return msg, fightLog
+}
+
+// userPassChallenge 为用户添加已通过的挑战ID
+// 参数:
+//   - user: 用户对象，用于记录已通过的挑战ID
+//   - challengeId: 挑战ID，表示用户通过的挑战
+func (s *ChallengeService) userPassChallenge(user *model.User, challengeId uint) *model.User {
+	if user.PassedChallengeTime == nil {
+		user.PassedChallengeTime = make(map[uint]string)
+	}
+	user.PassedChallengeTime[challengeId] = time.Now().Format("2006-01-02")
+	// 检查用户是否已经通过该挑战，避免重复记录
+	for i := 0; i < len(user.PassedChallengeId); i++ {
+		if user.PassedChallengeId[i] == challengeId {
+			return user
+		}
+	}
+	// 将新的挑战ID添加到用户已通过的挑战列表中
+	user.PassedChallengeId = append(user.PassedChallengeId, challengeId)
+	return user
 }
 
 const (
@@ -206,11 +233,13 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 	for {
 		// 检查战斗结束条件
 		if isPlayerDead(player) {
+			logMsg += "玩家 " + player.Username + " 输掉了战斗！\n"
 			return fightLose, logMsg
 		}
 		if isAllMonstersDead(monsterStates) {
 			// 更新玩家剩余血量
 			user.Hp = player.Hp
+			logMsg += "玩家 " + player.Username + " 战斗胜利！\n"
 			return fightWin, logMsg
 		}
 
@@ -236,11 +265,13 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 
 			// 攻击后立即检查战斗结束（避免后续单位无效出手）
 			if isPlayerDead(player) {
+				logMsg += "玩家 " + player.Username + " 输掉了战斗！\n"
 				return fightLose, logMsg
 			}
 			if isAllMonstersDead(monsterStates) {
 				// 更新玩家剩余血量
 				user.Hp = player.Hp
+				logMsg += "玩家 " + player.Username + " 战斗胜利！\n"
 				return fightWin, logMsg
 			}
 		}
@@ -252,12 +283,13 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 // copyUserState 深拷贝玩家状态（避免战斗中修改原用户数据）
 func copyUserState(user *model.User) *model.User {
 	return &model.User{
-		Attack:  user.Attack,
-		Defense: user.Defense,
-		Hp:      user.Hp,
-		HpLimit: user.HpLimit,
-		Speed:   user.Speed,
-		Level:   user.Level,
+		Username: user.Username,
+		Attack:   user.Attack,
+		Defense:  user.Defense,
+		Hp:       user.Hp,
+		HpLimit:  user.HpLimit,
+		Speed:    user.Speed,
+		Level:    user.Level,
 	}
 }
 

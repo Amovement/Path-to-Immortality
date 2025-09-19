@@ -1,6 +1,9 @@
 package service
 
-var version = "alpha-0.0.2"
+var (
+	appMode = "prod"
+	version = "alpha-0.0.3"
+)
 
 type VersionService struct {
 }
@@ -17,4 +20,8 @@ func NewVersionService() *VersionService {
 //   - string: The current version as a string value.
 func (s VersionService) GetVersion() string {
 	return version
+}
+
+func IsProd() bool {
+	return appMode == "prod"
 }

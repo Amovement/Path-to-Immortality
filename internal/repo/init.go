@@ -75,56 +75,56 @@ var Challenges = []model.Challenge{
 	{ID: 6, LevelLimit: 30, Title: "妖兽潮拦截", Gold: 20},   // 25级
 	{ID: 7, LevelLimit: 30, Title: "引气境圆满挑战", Gold: 30}, // 30级
 
-	{ID: 8, LevelLimit: 60, Title: "筑基秘境初探", Gold: 5},    // 35级
-	{ID: 9, LevelLimit: 60, Title: "火鸦巢清理", Gold: 8},     // 40级
-	{ID: 10, LevelLimit: 60, Title: "玄冰窟探险", Gold: 12},   // 45级
-	{ID: 11, LevelLimit: 60, Title: "筑基期入门考核", Gold: 15}, // 50级
-	{ID: 12, LevelLimit: 60, Title: "血魔谷围剿", Gold: 20},   // 55级
-	{ID: 13, LevelLimit: 60, Title: "筑基境圆满挑战", Gold: 30}, // 60级
+	{ID: 8, LevelLimit: 60, Title: "筑基秘境初探", Gold: 50},    // 35级
+	{ID: 9, LevelLimit: 60, Title: "火鸦巢清理", Gold: 60},     // 40级
+	{ID: 10, LevelLimit: 60, Title: "玄冰窟探险", Gold: 70},    // 45级
+	{ID: 11, LevelLimit: 60, Title: "筑基期入门考核", Gold: 80},  // 50级
+	{ID: 12, LevelLimit: 60, Title: "血魔谷围剿", Gold: 90},    // 55级
+	{ID: 13, LevelLimit: 60, Title: "筑基境圆满挑战", Gold: 100}, // 60级
 
-	{ID: 14, LevelLimit: 90, Title: "金丹洞府开启", Gold: 50},   // 65级
-	{ID: 15, LevelLimit: 90, Title: "尸王殿破局", Gold: 80},    // 70级
-	{ID: 16, LevelLimit: 90, Title: "风灵谷试炼", Gold: 120},   // 75级
-	{ID: 17, LevelLimit: 90, Title: "金丹长老考验", Gold: 150},  // 80级
+	{ID: 14, LevelLimit: 90, Title: "金丹洞府开启", Gold: 120},  // 65级
+	{ID: 15, LevelLimit: 90, Title: "尸王殿破局", Gold: 140},   // 70级
+	{ID: 16, LevelLimit: 90, Title: "风灵谷试炼", Gold: 160},   // 75级
+	{ID: 17, LevelLimit: 90, Title: "金丹长老考验", Gold: 180},  // 80级
 	{ID: 18, LevelLimit: 90, Title: "古龙巢穴探秘", Gold: 200},  // 85级
-	{ID: 19, LevelLimit: 90, Title: "金丹境圆满挑战", Gold: 300}, // 90级
+	{ID: 19, LevelLimit: 90, Title: "金丹境圆满挑战", Gold: 220}, // 90级
 
-	{ID: 20, LevelLimit: 120, Title: "元婴遗迹探索", Gold: 50},   // 95级
-	{ID: 21, LevelLimit: 120, Title: "玄天蛇窟历险", Gold: 80},   // 100级
-	{ID: 22, LevelLimit: 120, Title: "血河源头镇压", Gold: 120},  // 105级
-	{ID: 23, LevelLimit: 120, Title: "雷劫剑灵降服", Gold: 150},  // 110级
-	{ID: 24, LevelLimit: 120, Title: "元婴大典挑战", Gold: 200},  // 115级
-	{ID: 25, LevelLimit: 120, Title: "元婴境圆满挑战", Gold: 300}, // 120级
+	{ID: 20, LevelLimit: 120, Title: "元婴遗迹探索", Gold: 250},  // 95级
+	{ID: 21, LevelLimit: 120, Title: "玄天蛇窟历险", Gold: 280},  // 100级
+	{ID: 22, LevelLimit: 120, Title: "血河源头镇压", Gold: 310},  // 105级
+	{ID: 23, LevelLimit: 120, Title: "雷劫剑灵降服", Gold: 340},  // 110级
+	{ID: 24, LevelLimit: 120, Title: "元婴大典挑战", Gold: 370},  // 115级
+	{ID: 25, LevelLimit: 120, Title: "元婴境圆满挑战", Gold: 400}, // 120级
 
-	{ID: 26, LevelLimit: 150, Title: "化神秘境闯关", Gold: 50},   // 125级
-	{ID: 27, LevelLimit: 150, Title: "空间裂缝平定", Gold: 80},   // 130级
-	{ID: 28, LevelLimit: 150, Title: "上古战场历练", Gold: 120},  // 135级
-	{ID: 29, LevelLimit: 150, Title: "化神长老对决", Gold: 150},  // 140级
-	{ID: 30, LevelLimit: 150, Title: "混沌石林试炼", Gold: 200},  // 145级
-	{ID: 31, LevelLimit: 150, Title: "化神境圆满挑战", Gold: 300}, // 150级
+	{ID: 26, LevelLimit: 150, Title: "化神秘境闯关", Gold: 450},  // 125级
+	{ID: 27, LevelLimit: 150, Title: "空间裂缝平定", Gold: 500},  // 130级
+	{ID: 28, LevelLimit: 150, Title: "上古战场历练", Gold: 550},  // 135级
+	{ID: 29, LevelLimit: 150, Title: "化神长老对决", Gold: 600},  // 140级
+	{ID: 30, LevelLimit: 150, Title: "混沌石林试炼", Gold: 650},  // 145级
+	{ID: 31, LevelLimit: 150, Title: "化神境圆满挑战", Gold: 700}, // 150级
 
-	{ID: 32, LevelLimit: 180, Title: "魔窟征伐", Gold: 50},     // 155级
-	{ID: 33, LevelLimit: 180, Title: "九天瑶池试炼", Gold: 80},   // 160级
-	{ID: 34, LevelLimit: 180, Title: "万尸窟净化", Gold: 120},   // 165级
-	{ID: 35, LevelLimit: 180, Title: "宗主宝座争夺", Gold: 150},  // 170级
-	{ID: 36, LevelLimit: 180, Title: "洪荒兽域探险", Gold: 200},  // 175级
-	{ID: 37, LevelLimit: 180, Title: "炼虚境圆满挑战", Gold: 300}, // 180级
+	{ID: 32, LevelLimit: 180, Title: "魔窟征伐", Gold: 770},     // 155级
+	{ID: 33, LevelLimit: 180, Title: "九天瑶池试炼", Gold: 800},   // 160级
+	{ID: 34, LevelLimit: 180, Title: "万尸窟净化", Gold: 870},    // 165级
+	{ID: 35, LevelLimit: 180, Title: "宗主宝座争夺", Gold: 900},   // 170级
+	{ID: 36, LevelLimit: 180, Title: "洪荒兽域探险", Gold: 970},   // 175级
+	{ID: 37, LevelLimit: 180, Title: "炼虚境圆满挑战", Gold: 1000}, // 180级
 
-	{ID: 38, LevelLimit: 210, Title: "仙域开启", Gold: 50},     // 185级
-	{ID: 39, LevelLimit: 210, Title: "灭世魔魂封印", Gold: 80},   // 190级
-	{ID: 40, LevelLimit: 210, Title: "天道试炼场", Gold: 120},   // 195级
-	{ID: 41, LevelLimit: 210, Title: "圣祖传承考验", Gold: 150},  // 200级
-	{ID: 42, LevelLimit: 210, Title: "混沌空间历练", Gold: 200},  // 205级
-	{ID: 43, LevelLimit: 210, Title: "合体境圆满挑战", Gold: 300}, // 210级
+	{ID: 38, LevelLimit: 210, Title: "仙域开启", Gold: 1100},    // 185级
+	{ID: 39, LevelLimit: 210, Title: "灭世魔魂封印", Gold: 1200},  // 190级
+	{ID: 40, LevelLimit: 210, Title: "天道试炼场", Gold: 1300},   // 195级
+	{ID: 41, LevelLimit: 210, Title: "圣祖传承考验", Gold: 1400},  // 200级
+	{ID: 42, LevelLimit: 210, Title: "混沌空间历练", Gold: 1500},  // 205级
+	{ID: 43, LevelLimit: 210, Title: "合体境圆满挑战", Gold: 1600}, // 210级
 
-	{ID: 44, LevelLimit: 250, Title: "一重雷劫挑战", Gold: 50},    // 215级
-	{ID: 45, LevelLimit: 250, Title: "空间法则试炼", Gold: 80},    // 220级
-	{ID: 46, LevelLimit: 250, Title: "仙尊传承争夺", Gold: 120},   // 225级
-	{ID: 47, LevelLimit: 250, Title: "天魔巢穴围剿", Gold: 150},   // 230级
-	{ID: 48, LevelLimit: 250, Title: "天道法则领悟", Gold: 200},   // 235级
-	{ID: 49, LevelLimit: 250, Title: "执法者考验", Gold: 300},    // 240级
-	{ID: 50, LevelLimit: 250, Title: "鸿蒙本源试炼", Gold: 1600},  // 245级
-	{ID: 51, LevelLimit: 250, Title: "渡劫境圆满挑战", Gold: 4800}, // 250级
+	{ID: 44, LevelLimit: 240, Title: "一重雷劫挑战", Gold: 1800},  // 215级
+	{ID: 45, LevelLimit: 240, Title: "空间法则试炼", Gold: 2000},  // 220级
+	{ID: 46, LevelLimit: 240, Title: "仙尊传承争夺", Gold: 3000},  // 225级
+	{ID: 47, LevelLimit: 240, Title: "天魔巢穴围剿", Gold: 4000},  // 230级
+	{ID: 48, LevelLimit: 240, Title: "天道法则领悟", Gold: 5000},  // 235级
+	{ID: 49, LevelLimit: 240, Title: "执法者考验", Gold: 6000},   // 240级
+	{ID: 50, LevelLimit: 240, Title: "鸿蒙本源试炼", Gold: 7000},  // 245级
+	{ID: 51, LevelLimit: 240, Title: "渡劫境圆满挑战", Gold: 8000}, // 250级
 }
 
 // 挑战-怪物关联数据（按每级3点属性成长平衡难度）
@@ -199,14 +199,20 @@ var challengeMonsters = []model.ChallengeMonster{
 
 // Goods 商品
 var Goods = []model.Goods{
-	{ID: 1, Name: "淬体丹", Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险"},
-	{ID: 2, Name: "莽牛血", Price: 50, Description: "增加一点攻击，存在灵力反噬风险"},
-	{ID: 3, Name: "玄龟甲", Price: 50, Description: "增加一点防御，存在灵力反噬风险"},
-	{ID: 4, Name: "灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险"},
-	{ID: 5, Name: "药渣", Price: 10, Description: "某次炼丹的残渣，效果非常混乱"},
-	{ID: 6, Name: "修为丹", Price: 20, Description: "增加五点经验"},
+	{ID: 1, Name: "下品淬体丹", Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险,长期服用存在耐药性"},
+	{ID: 2, Name: "下品莽牛血", Price: 50, Description: "增加一点攻击，存在灵力反噬风险,长期服用存在耐药性"},
+	{ID: 3, Name: "下品玄龟甲", Price: 50, Description: "增加一点防御，存在灵力反噬风险,长期服用存在耐药性"},
+	{ID: 4, Name: "下品灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
+
+	{ID: 5, Name: "逍遥散", Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
+	{ID: 6, Name: "修为丹", Price: 20, Description: "增加二十点经验"},
 	{ID: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复三十点生命值"},
-	{ID: 8, Name: "金币罐子", Price: 20, Description: "会获得随机数量的金币"},
+	{ID: 8, Name: "金币罐子", Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
+
+	{ID: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,甚至可以突破境界的限制"},
+	{ID: 10, Name: "上品莽牛血", Price: 5000, Description: "增加两点攻击，药效温和非常稳定,甚至可以突破境界的限制"},
+	{ID: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,甚至可以突破境界的限制"},
+	{ID: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,甚至可以突破境界的限制"},
 }
 
 var MonsterMap map[uint]model.Monster
