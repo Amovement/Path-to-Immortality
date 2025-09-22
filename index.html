@@ -359,7 +359,7 @@
             const go = new Go();
 
             // 2. 加载WASM文件（先转为ArrayBuffer确保兼容性）
-            const response = await fetch('main-alpha-0.0.3.wasm');
+            const response = await fetch('main-alpha-0.0.4.wasm');
             if (!response.ok) {
                 throw new Error(`加载失败: ${response.status} ${response.statusText}`);
             }

@@ -40,10 +40,12 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 	//	{ID: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复三十点生命值"},
 	//	{ID: 8, Name: "金币罐子", Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
 	//
-	//	{ID: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,甚至可以突破境界的限制"},
-	//	{ID: 10, Name: "上品莽牛血", Price: 5000, Description: "增加两点攻击，药效温和非常稳定,甚至可以突破境界的限制"},
-	//	{ID: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,甚至可以突破境界的限制"},
-	//	{ID: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,甚至可以突破境界的限制"},
+	//	{ID: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
+	//	{ID: 10, Name: "上品莽牛血", Price: 5000, Description: "增加两点攻击，药效温和非常稳定,可以长期服用,但仍有限制"},
+	//	{ID: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
+	//	{ID: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
+	//
+	//	{ID: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点"},
 
 	// 检查耐药性
 	ok = s.checkGoodsLimit(user, goodsId)
@@ -104,17 +106,20 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 		msg = msg + "好运连连 获得金币 " + fmt.Sprint(gold) + "枚. "
 
 	case 9:
-		msg = msg + "你的体魄上限增强了."
+		msg = msg + "气息更加绵长了."
 		user.HpLimit += 10
 	case 10:
-		msg = msg + "你的攻击更加犀利了."
+		msg = msg + "攻击变得更为凌厉了."
 		user.Attack += 2
 	case 11:
-		msg = msg + "你的防御增强了."
+		msg = msg + "叠甲, 过."
 		user.Defense += 2
 	case 12:
 		msg = msg + "脚下生风!"
 		user.Speed += 2
+	case 13:
+		msg = msg + "体内的力量涌出来了. 潜能 +1 ."
+		user.Potential += 1
 	}
 
 	if badThingHappened { // 惩罚
@@ -172,6 +177,14 @@ func (s *GoodsService) checkGoodsLimit(user *model.User, goodsId int) bool {
 		}
 	case 4:
 		if user.Speed+1 > user.Level*3 {
+			return false
+		}
+	}
+
+	if goodsId >= 9 && goodsId <= 12 {
+		// 高级的药 需要检查总属性不超过等级的12倍
+		totalStat := user.Attack + user.Defense + user.Speed + user.HpLimit/5 + user.Potential // 玩家的总属性
+		if totalStat >= user.Level*12 {
 			return false
 		}
 	}
