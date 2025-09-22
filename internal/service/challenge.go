@@ -182,7 +182,7 @@ func (s *ChallengeService) JoinChallenge(ChallengeId int) (string, string) {
 	}
 	updateUserInfo(user)
 
-	return msg, fightLog
+	return msg, fightLog + "\n" + msg
 }
 
 // userPassChallenge 为用户添加已通过的挑战ID
