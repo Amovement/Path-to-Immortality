@@ -1,6 +1,9 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // 定义境界名称列表，顺序从低到高
 var realms = []string{
@@ -13,6 +16,40 @@ var realms = []string{
 	"合体境",
 	"大乘境",
 	"渡劫境",
+}
+
+// IntToRoman 将整数转换为罗马数字
+// 参数:
+//
+//	num: 要转换的整数，范围应在1到3999之间
+//
+// 返回值:
+//
+//	string: 对应的罗马数字字符串，如果输入超出范围则返回"MAX"
+func IntToRoman(num int64) string {
+	// 检查输入是否在有效范围内
+	if num < 1 || num > 3999 {
+		return "MAX"
+	}
+
+	// 定义罗马数字对应的数值和符号
+	var (
+		values  = []int64{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}
+		symbols = []string{"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"}
+	)
+
+	var result strings.Builder
+
+	// 从最大的数值开始转换
+	for i := 0; i < len(values); i++ {
+		// 当当前数值小于等于剩余数字时，添加对应的符号
+		for num >= values[i] {
+			result.WriteString(symbols[i])
+			num -= values[i]
+		}
+	}
+
+	return result.String()
 }
 
 // GetCultivationByLevel 根据等级获取对应的修仙境界名称

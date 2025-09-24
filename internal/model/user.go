@@ -14,6 +14,7 @@ type User struct {
 	NextCultivationTime int64           `json:"nextCultivationTime"` // 治疗和修炼占用同一个时间
 	PassedChallengeId   []uint          `json:"passedChallengeId"`   // 通过的挑战 ID
 	PassedChallengeTime map[uint]string `json:"passedChallengeTime"` // 通过的 Challenge 时间
+	RestartCount        int64           `json:"restartCount"`        // 成功轮回转生的次数
 }
 
 const (

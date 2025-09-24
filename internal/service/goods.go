@@ -36,8 +36,8 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 	//	{ID: 4, Name: "下品灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
 	//
 	//	{ID: 5, Name: "逍遥散", Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
-	//	{ID: 6, Name: "修为丹", Price: 20, Description: "增加二十点经验"},
-	//	{ID: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复三十点生命值"},
+	//	{ID: 6, Name: "修为丹", Price: 20, Description: "增加十点经验"},
+	//	{ID: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复十五点生命值"},
 	//	{ID: 8, Name: "金币罐子", Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
 	//
 	//	{ID: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
@@ -45,7 +45,7 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 	//	{ID: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
 	//	{ID: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
 	//
-	//	{ID: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点"},
+	//	{ID: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
 
 	// 检查耐药性
 	ok = s.checkGoodsLimit(user, goodsId)
@@ -92,14 +92,14 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 			msg = msg + " 什么都没有发生."
 		}
 	case 6:
-		user.Exp += 20
-		msg = msg + " 获得经验 20 点"
+		user.Exp += 10
+		msg = msg + " 获得经验 10 点"
 	case 7:
-		user.Hp += 30
+		user.Hp += 15
 		if user.Hp > user.HpLimit {
 			user.Hp = user.HpLimit
 		}
-		msg = msg + " 获得生命值 30 点"
+		msg = msg + " 获得生命值 15 点"
 	case 8:
 		gold := utils.GetRandomInt64(1, utils.Max(user.Level, 150))
 		user.Gold += gold
@@ -120,6 +120,10 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 	case 13:
 		msg = msg + "体内的力量涌出来了. 潜能 +1 ."
 		user.Potential += 1
+		if user.RestartCount > 0 {
+			user.Potential = user.Potential + user.RestartCount
+			msg += "体内的另外一个灵魂正在回应你, 你好像想起来了很多东西, 额外获得了 " + fmt.Sprint(user.RestartCount) + " 点潜能"
+		}
 	}
 
 	if badThingHappened { // 惩罚
@@ -184,7 +188,7 @@ func (s *GoodsService) checkGoodsLimit(user *model.User, goodsId int) bool {
 	if goodsId >= 9 && goodsId <= 12 {
 		// 高级的药 需要检查总属性不超过等级的12倍
 		totalStat := user.Attack + user.Defense + user.Speed + user.HpLimit/5 + user.Potential // 玩家的总属性
-		if totalStat >= user.Level*12 {
+		if totalStat >= user.Level*12+user.RestartCount {
 			return false
 		}
 	}

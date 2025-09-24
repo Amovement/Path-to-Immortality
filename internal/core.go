@@ -94,6 +94,11 @@ func (c *Core) Cultivation(this js.Value, args []js.Value) interface{} {
 	return resp
 }
 
+func (c *Core) Restart(this js.Value, args []js.Value) interface{} {
+	resp := c.UserService.Restart()
+	return resp
+}
+
 // ------------ 版本类 ---------------------
 func (c *Core) GetVersion(this js.Value, args []js.Value) interface{} {
 	return c.VersionService.GetVersion()

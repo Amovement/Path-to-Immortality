@@ -20,6 +20,7 @@ func registerUserCallbacks(core *internal.Core) {
 	js.Global().Set("heal", js.FuncOf(core.Heal))
 	js.Global().Set("cultivation", js.FuncOf(core.Cultivation))
 	js.Global().Set("getGold", js.FuncOf(core.GetGold))
+	js.Global().Set("restart", js.FuncOf(core.Restart))
 }
 
 func registerChallengeCallbacks(core *internal.Core) {

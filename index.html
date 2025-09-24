@@ -76,6 +76,10 @@
                     <div class="flex justify-between pb-2 border-b border-dark-300">
                         <span class="text-dark-400">用户名:</span>
                         <span id="username">未设置</span>
+                        <button id="restartB" onclick="showRestartConfirm()"
+                                class="hidden bg-danger/40 px-4 py-1.5 rounded-lg hover:bg-danger/30 transition-colors text-sm">
+                            轮回转生
+                        </button>
                     </div>
                     <div class="flex justify-between pb-2 border-b border-dark-300">
                         <span class="text-dark-400">修为:</span>
@@ -229,6 +233,31 @@
     </div>
 </footer>
 
+<!-- 新增：确认转生的模态框 -->
+<div id="restartConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="hideRestartConfirm()"></div>
+    <div class="relative bg-dark-200 rounded-xl border border-dark-300 shadow-xl p-6 max-w-md w-full transform transition-transform duration-300 scale-95">
+        <h3 class="text-lg font-bold mb-3 text-danger flex items-center">
+            <i class="fa fa-exclamation-triangle mr-2"></i>确认轮回转生？
+        </h3>
+        <p class="text-dark-400 text-sm mb-5">
+            <b>转生后将重置当前所有进度，重新开始修炼。</b><br>
+            转生之人服用丹药和提升境界将会带来更强的效果。<br>
+            确定要执行这个操作吗？
+        </p>
+        <div class="flex gap-3 justify-end">
+            <button onclick="hideRestartConfirm()"
+                    class="px-4 py-1.5 bg-dark-300 rounded-lg hover:bg-dark-400 transition-colors text-sm">
+                取消
+            </button>
+            <button onclick="confirmRestart()"
+                    class="px-4 py-1.5 bg-danger/40 text-danger rounded-lg hover:bg-danger/50 transition-colors text-sm">
+                确认转生
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="wasm_exec.js"></script>
 <script>
     // 加载商品
@@ -351,6 +380,42 @@
         }
     }
 </script>
+
+<script>
+    // 显示确认模态框
+    function showRestartConfirm() {
+        const modal = document.getElementById('restartConfirmModal');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    // 隐藏确认模态框
+    function hideRestartConfirm() {
+        const modal = document.getElementById('restartConfirmModal');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // 确认转生（原restartBtn逻辑）
+    async function confirmRestart() {
+        // 先隐藏确认框
+        hideRestartConfirm();
+
+        // 执行转生逻辑
+        const result = restart();
+        refreshUserInfo();
+        showToast(result);
+        addToLog(`转生: ${result}`);
+
+        // 隐藏转生按钮
+        const btn = document.getElementById('restartB');
+        if (btn) {
+            btn.classList.add('hidden');
+        }
+    }
+
+    // 修改原按钮点击事件为显示确认框
+    // 注意：按钮的onclick已改为showRestartConfirm()
+</script>
+
 <script>
     // 初始化并加载WASM
     async function initWasm() {
@@ -359,7 +424,7 @@
             const go = new Go();
 
             // 2. 加载WASM文件（先转为ArrayBuffer确保兼容性）
-            const response = await fetch('main-alpha-0.0.5.wasm');
+            const response = await fetch('main-alpha-0.0.6.wasm');
             if (!response.ok) {
                 throw new Error(`加载失败: ${response.status} ${response.statusText}`);
             }
@@ -450,6 +515,15 @@
             document.getElementById('potential').textContent = userInfo.potential || '0';
             document.getElementById('gold').textContent = userInfo.gold || '0';
 
+            const btn = document.getElementById('restartB');
+            if (btn) {
+                if(userInfo.level>=150){
+                    btn.classList.remove('hidden');
+                }else{
+                    btn.classList.add('hidden'); // 添加隐藏类
+                }
+            }
+
             showToast('信息已刷新');
         } catch (e) {
             showToast('获取信息失败: ' + e.message, true);
@@ -475,6 +549,17 @@
             showToast('用户名已更新');
         } catch (e) {
             showToast('设置失败: ' + e.message, true);
+        }
+    }
+
+    async function restartBtn() {
+        const result = restart();
+        refreshUserInfo();
+        showToast(result);
+        addToLog(`转生: ${result}`);
+        const btn = document.getElementById('restartB');
+        if (btn) {
+            btn.classList.add('hidden'); // 添加隐藏类
         }
     }
 

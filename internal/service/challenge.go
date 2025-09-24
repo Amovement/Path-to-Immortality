@@ -159,7 +159,7 @@ func (s *ChallengeService) JoinChallenge(ChallengeId int) (string, string) {
 	if msg == fightWin {
 		user.Gold = user.Gold + challengeCache.Gold
 		user = s.userPassChallenge(user, challenge.ID)
-		msg = msg + " 获得金币 " + fmt.Sprint(challengeCache.Gold) + " 枚"
+		msg = msg + challenge.Title + "战斗胜利. 获得金币 " + fmt.Sprint(challengeCache.Gold) + " 枚."
 	} else if msg == fightLose {
 		// 掉 10% 经验惩罚 + 损失身上 10% 的金币
 		// 如果身上经验不足 10% 则直接掉级，所有属性减 1

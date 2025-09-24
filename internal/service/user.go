@@ -56,7 +56,7 @@ func updateUserInfo(user *model.User) {
 // GetUserInfo 获取本地用户信息
 func (s *UserService) GetUserInfo() types.GetUserInfoResp {
 	user := getLocalUser()
-	return types.GetUserInfoResp{
+	ret := types.GetUserInfoResp{
 		Username:            user.Username,
 		Attack:              user.Attack,
 		Defense:             user.Defense,
@@ -70,6 +70,10 @@ func (s *UserService) GetUserInfo() types.GetUserInfoResp {
 		NextCultivationTime: time.Unix(user.NextCultivationTime, 0).Format("2006-01-02 15:04:05"),
 		Level:               user.Level,
 	}
+	if user.RestartCount > 0 {
+		ret.Cultivation += fmt.Sprintf(" [转生之人%s]", utils.IntToRoman(user.RestartCount))
+	}
+	return ret
 }
 
 // SetUsername 设置用户用户名
@@ -188,7 +192,11 @@ func (s *UserService) Cultivation() string {
 		user.Potential = user.Potential + 3
 		user.HpLimit = user.HpLimit + 5
 		user.Hp = user.HpLimit
-		msg += "你感觉浑身充满了力量，获得了3点潜能，境界提升了..."
+		msg += "你感觉浑身充满了力量，获得了 3 点潜能，境界提升了..."
+		if user.RestartCount > 0 {
+			user.Potential = user.Potential + user.RestartCount
+			msg += "体内的另外一个灵魂正在回应你, 你好像想起来了很多东西, 额外获得了 " + fmt.Sprint(user.RestartCount) + " 点潜能"
+		}
 	}
 	// 更新用户
 	updateUserInfo(user)
@@ -269,4 +277,23 @@ func (s *UserService) checkUserPassedChallenge(user *model.User) bool {
 		}
 	}
 	return false
+}
+
+// Restart 重置 轮回转生
+func (s *UserService) Restart() string {
+	var msg string
+	user := getLocalUser()
+	newUser := model.NewUser()
+	newUser.Username = user.Username
+	newUser.RestartCount = user.RestartCount
+
+	if user.Level >= 150 {
+		newUser.RestartCount += 1
+		msg = "一阵恍惚后...你重新睁开了眼睛, 年轻的肉体里充满了使不完的劲. 你意识到自己已经转生 " + fmt.Sprint(newUser.RestartCount) + " 次. "
+	} else {
+		msg = "一阵恍惚后...你重新睁开了眼睛, 你好像忘记了很多事情... "
+	}
+
+	updateUserInfo(newUser)
+	return msg
 }
