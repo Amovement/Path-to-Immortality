@@ -316,16 +316,7 @@
             const type = item.type || 0;
 
             // 根据物品名称自动选择图标
-            let iconClass = 'fa-cube'; // 默认图标
-            if (name.includes('丹') || name.includes('血') || name.includes('散') || name.includes('气')) {
-                iconClass = 'fa-flask'; // 丹药类
-            } else if (name.includes('剑') || name.includes('刀') || name.includes('武器')) {
-                iconClass = 'fa-sword'; // 武器类
-            } else if (name.includes('甲') || name.includes('皮') || name.includes('防')) {
-                iconClass = 'fa-shield'; // 防具类
-            } else if (name.includes('书') || name.includes('秘籍') || name.includes('心法')) {
-                iconClass = 'fa-book'; // 秘籍类
-            }
+            let iconClass = 'fa-cube';
 
             // 物品数量标签（超过1个才显示）
             const countBadge = count > 1 ?
@@ -334,21 +325,22 @@
             </span>` : '';
 
             html += `
-            <div class="flex flex-col md:flex-row gap-4 p-4 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
-                <div class="w-full md:w-24 h-24 bg-dark-300 rounded flex items-center justify-center relative">
-                    <i class="fa ${iconClass} text-3xl text-accent"></i>
+            <div class="flex flex-col md:flex-row gap-1 p-1 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
+                <div class="w-full md:w-1 h-1 bg-dark-300 rounded flex items-center justify-center relative">
+
                     ${countBadge}
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between">
                         <h3 class="font-bold">${name}</h3>
-                        ${type === 0 ? '<span class="text-primary text-sm px-2 py-0.5 rounded bg-primary/10">消耗品</span>' : ''}
+                        ${type === 0 ? '<span class="text-primary text-sm px-1 py-0.5 rounded bg-primary/10">消耗品</span>' : ''}
                     </div>
-                    <p class="text-dark-400 text-sm mt-1 whitespace-pre-line">
+                    <!-- 减少描述文本的上下间距 -->
+                    <p class="text-dark-400 text-xs md:text-sm mt-1 mb-2 whitespace-pre-line">
                         ${description}
                     </p>
-                    <div class="mt-3 flex justify-end">
-                        <button onclick="useBagItemBtn(${id})" class=" text-gray-100 px-3 py-1 rounded hover:bg-secondary text-sm transition-colors">
+                    <div class="mt-1 flex justify-end">
+                        <button onclick="useBagItemBtn(${id})" class=" text-gray-100 px-1 py-1 rounded hover:bg-secondary text-sm transition-colors">
                             <i class="fa fa-plus-circle"></i>使用
                         </button>
                     </div>
@@ -435,26 +427,24 @@
 
             // 根据商品名称自动选择图标（可根据实际情况调整）
             let iconClass = 'fa-cube'; // 默认图标
-            if (name.includes('丹') || name.includes('药') || name.includes('血') || name.includes('散')) iconClass = 'fa-flask';
-            if (name.includes('剑') || name.includes('刀') || name.includes('武器')) iconClass = 'fa-sword';
-            if (name.includes('甲') || name.includes('皮') || name.includes('防')) iconClass = 'fa-shield';
-            if (name.includes('书') || name.includes('秘籍') || name.includes('心法')) iconClass = 'fa-book';
 
             html += `
-                    <div class="flex flex-col md:flex-row gap-4 p-4 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
-                        <div class="w-full md:w-24 h-24 bg-dark-300 rounded flex items-center justify-center">
-                            <i class="fa ${iconClass} text-3xl text-accent"></i>
+                    <div class="flex flex-col md:flex-row gap-1 p-1 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
+                        <!-- 缩小图标容器尺寸 -->
+                        <div class="w-full md:w-1 h-1 bg-dark-300 rounded flex items-center justify-center">
                         </div>
                         <div class="flex-1">
                             <div class="flex justify-between">
-                                <h3 class="font-bold">${name}</h3>
-                                <span class="text-secondary font-medium">${price} 金</span>
+                                <h3 class="font-bold text-sm md:text-base">${name}</h3>
+                                <span class="text-secondary font-medium text-sm">${price} 金</span>
                             </div>
-                            <p class="text-dark-400 text-sm mt-1 whitespace-pre-line">
+                            <!-- 减少描述文本的上下间距 -->
+                            <p class="text-dark-400 text-xs md:text-sm mt-1 mb-2 whitespace-pre-line">
                                 ${description}
                             </p>
-                            <div class="mt-3 flex justify-end">
-                                <button onclick="buyGoodsBtn(${id})" class="text-gray-100 px-3 py-1 rounded hover:bg-primary text-sm transition-colors">
+                            <div class="flex justify-end">
+                                <!-- 缩小按钮尺寸 -->
+                                <button onclick="buyGoodsBtn(${id})" class="text-gray-100 px-1 py-1 rounded hover:bg-primary text-xs transition-colors">
                                     <i class="fa fa-shopping-cart mr-1"></i>购买
                                 </button>
                             </div>

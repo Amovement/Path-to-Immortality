@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 	"time"
 )
 
@@ -35,44 +34,45 @@ func init() {
 }
 
 // RandomEquip 随机生成装备
-func RandomEquip() *Equip {
+func RandomEquip(minLevel, maxLevel int64, equipType int) *Equip {
+	level := rand.Int63n(maxLevel-minLevel+1) + minLevel
+
 	// 随机选择装备类型
-	equipType := rand.Intn(EquipTypeMax)
+	if equipType == -1 {
+		equipType = rand.Intn(EquipTypeMax)
+	}
 
 	// 根据装备类型获取基础属性范围和可能的名称前缀/后缀
 	baseAttrs := getBaseAttributes(equipType)
 	nameParts := getEquipmentNameParts(equipType)
 
 	// 随机生成装备名称
-	name := generateEquipmentName(nameParts, equipType)
-
-	var level int64
-	level = 1
+	name := generateEquipmentName(nameParts, level)
 
 	// 根据等级和基础属性计算最终属性
-	attack := int64(float64(baseAttrs.attack) * (1.0 + float64(level)*0.1))
-	defense := int64(float64(baseAttrs.defense) * (1.0 + float64(level)*0.1))
-	speed := int64(float64(baseAttrs.speed) * (1.0 + float64(level)*0.1))
-	hp := int64(float64(baseAttrs.hp) * (1.0 + float64(level)*0.1))
+	attack := int64(float64(baseAttrs.attack) * (1.0 + float64(level)*0.5))
+	defense := int64(float64(baseAttrs.defense) * (1.0 + float64(level)*0.5))
+	speed := int64(float64(baseAttrs.speed) * (1.0 + float64(level)*0.5))
+	hp := int64(float64(baseAttrs.hp) * (1.0 + float64(level)*0.5))
 
 	// 随机生成特效
-	//specials := generateSpecials(equipType, level)
-	var specials []string
+	specials := generateSpecials(equipType, level)
+
+	equipNew := Equip{
+		Name:    name,
+		Type:    uint(equipType),
+		Level:   level,
+		Attack:  attack,
+		Defense: defense,
+		Speed:   speed,
+		Hp:      hp,
+		Special: specials,
+	}
 
 	// 生成描述
-	description := generateDescription(equipType, level, specials)
+	equipNew.Description = equipNew.GenerateDescription()
 
-	return &Equip{
-		Name:        name,
-		Description: description,
-		Type:        uint(equipType),
-		Level:       level,
-		Attack:      attack,
-		Defense:     defense,
-		Speed:       speed,
-		Hp:          hp,
-		Special:     specials,
-	}
+	return &equipNew
 }
 
 // 基础属性结构
@@ -158,14 +158,40 @@ func getEquipmentNameParts(equipType int) NameParts {
 	}
 }
 
-// 生成装备名称
-func generateEquipmentName(parts NameParts, equipType int) string {
-	prefix := parts.prefixes[rand.Intn(len(parts.prefixes))]
+// generateEquipmentName 根据给定的名称部件和等级生成装备名称
+// 参数:
+//   - parts: NameParts类型，包含前缀、中间部分和后缀的字符串切片
+//   - level: int64类型，表示装备等级，用于决定前缀的选择
+//
+// 返回值:
+//   - string: 生成的装备名称字符串
+func generateEquipmentName(parts NameParts, level int64) string {
+	var prefix string
+	// 根据等级选择前缀
+	if level <= 10 {
+		prefix = parts.prefixes[0]
+	} else if level <= 20 {
+		prefix = parts.prefixes[1]
+	} else if level <= 30 {
+		prefix = parts.prefixes[2]
+	} else if level <= 40 {
+		prefix = parts.prefixes[3]
+	} else {
+		prefix = parts.prefixes[4]
+	}
+
+	// 随机选择中间部分和后缀
 	middle := parts.middles[rand.Intn(len(parts.middles))]
 	suffix := parts.suffixes[rand.Intn(len(parts.suffixes))]
 
+	// 组合前缀、中间部分和后缀生成完整名称
 	return prefix + middle + suffix
 }
+
+const (
+	SpecialsCritical = "暴击"
+	SpecialsSolid    = "坚固"
+)
 
 // 可能的特效列表
 var possibleSpecials = map[int][]string{
@@ -219,15 +245,18 @@ func generateSpecials(equipType int, level int64) []string {
 	maxSpecials := 1
 
 	// 等级越高，可能的特效越多
-	if level >= 5 {
+	if level > 10 {
 		maxSpecials = 2
 	}
-	if level >= 8 {
+	if level > 20 {
 		maxSpecials = 3
+	}
+	if level > 30 {
+		maxSpecials = 4
 	}
 
 	// 随机决定实际特效数量
-	numSpecials := rand.Intn(maxSpecials) + 1
+	numSpecials := rand.Intn(maxSpecials + 1)
 
 	// 从可能的特效中随机选择
 	possible := possibleSpecials[equipType]
@@ -246,40 +275,40 @@ func generateSpecials(equipType int, level int64) []string {
 	return specials
 }
 
-// 生成装备描述
-func generateDescription(equipType int, level int64, specials []string) string {
+// GenerateDescription 生成装备描述
+func (e Equip) GenerateDescription() string {
 	var typeName string
-	switch equipType {
-	case int(EquipTypeHead):
+	switch e.Type {
+	case EquipTypeHead:
 		typeName = "头甲"
-	case int(EquipTypeBody):
+	case EquipTypeBody:
 		typeName = "胸甲"
-	case int(EquipTypeArm):
+	case EquipTypeArm:
 		typeName = "臂甲"
-	case int(EquipTypeLeg):
+	case EquipTypeLeg:
 		typeName = "腿甲"
-	case int(EquipTypeWeapon):
+	case EquipTypeWeapon:
 		typeName = "武器"
-	case int(EquipType):
+	case EquipType:
 		typeName = "配饰"
 	default:
 		typeName = "装备"
 	}
 
-	var desc strings.Builder
-	fmt.Sprintf("一件%d级的%s，", level, typeName)
+	var desc string
+	desc = fmt.Sprintf("一件%d级的%s，", e.Level, typeName)
 
-	if len(specials) > 0 {
-		desc.WriteString("拥有特殊效果：")
-		for i, s := range specials {
+	if len(e.Special) > 0 {
+		desc += "拥有特殊效果："
+		for i, s := range e.Special {
 			if i > 0 {
-				desc.WriteString("，")
+				desc += "，"
 			}
-			desc.WriteString(s)
+			desc += s
 		}
 	} else {
-		desc.WriteString("没有特殊效果。")
+		desc += "没有特殊效果。"
 	}
 
-	return desc.String()
+	return desc
 }

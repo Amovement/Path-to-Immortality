@@ -101,7 +101,7 @@ func (s *ChallengeService) LoadChallenge(challengeId uint) (types.ListChallengeI
 		monsters = append(monsters, types.Monster{
 			Attack:      user.Attack,
 			Defense:     user.Defense,
-			Hp:          user.Hp,
+			Hp:          user.HpLimit,
 			HpLimit:     user.HpLimit,
 			Name:        user.Username + "的心魔",
 			Speed:       user.Speed,

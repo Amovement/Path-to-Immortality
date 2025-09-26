@@ -48,7 +48,7 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 		Description: goods.Description,
 		Price:       goods.Price,
 		Count:       1,
-		Type:        model.ItemTypeConsume,
+		Type:        goods.Type,
 	})
 	updateUserInfo(user)
 

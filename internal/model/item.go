@@ -10,6 +10,7 @@ type Item struct {
 }
 
 const (
-	ItemTypeConsume = 0 // 消耗品
-	ItemTypeEquip   = 1 // 装备
+	ItemTypeConsume  = 0 // 消耗品
+	ItemTypeEquip    = 1 // 装备
+	ItemTypeMaterial = 2 //材料
 )

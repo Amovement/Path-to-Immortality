@@ -45,7 +45,16 @@ func updateLocalBag(bag *model.Bag) {
 	utils.SetStorage(model.BagStorageKey, bagString)
 }
 
+// cleanBagCountZeroItem 清理背包中数量为0的物品项
+//
+//		参数:
+//	  bag - 需要清理的背包对象指针
+//
+// 返回值:
+//
+//	*model.Bag - 清理后的背包对象指针
 func cleanBagCountZeroItem(bag *model.Bag) *model.Bag {
+	// 过滤出数量大于0的物品
 	var retItems []*model.Item
 	for _, item := range bag.Items {
 		if item.Count > 0 {
@@ -56,12 +65,22 @@ func cleanBagCountZeroItem(bag *model.Bag) *model.Bag {
 	return bag
 }
 
+// addBagItem 向本地背包中添加物品
+//
+//		参数:
+//	  itemAdd: 要添加的物品指针
 func addBagItem(itemAdd *model.Item) {
+	// 检查物品UUID是否有效，无效则直接返回
 	if itemAdd.UUid == 0 { // 未知物品
 		return
 	}
+
+	// 获取当前本地背包数据
 	bag := getLocalBag()
+
+	// 遍历背包中的物品，查找是否已存在相同UUID的物品
 	for i, item := range bag.Items {
+		// 如果找到相同UUID的物品，则增加数量并更新背包
 		if item.UUid == itemAdd.UUid {
 			bag.Items[i].Count += itemAdd.Count
 			updateLocalBag(bag)
@@ -69,6 +88,7 @@ func addBagItem(itemAdd *model.Item) {
 		}
 	}
 
+	// 如果没有找到相同UUID的物品，则将新物品添加到背包中
 	bag.Items = append(bag.Items, itemAdd)
 	updateLocalBag(bag)
 }
@@ -79,6 +99,9 @@ func (s *BagService) GetBag() string {
 	return string(bagBytes)
 }
 
+// UseBagItem 使用背包中的物品
+// id: 要使用的物品ID
+// 返回值: 操作结果的提示信息
 func (s *BagService) UseBagItem(id int64) string {
 	key := model.UserOperatorLock // 锁
 	if _, ok := CacheRedis.Load(key); ok {
@@ -96,13 +119,15 @@ func (s *BagService) UseBagItem(id int64) string {
 		if item.UUid == id && item.Count > 0 {
 			existed = true
 			if item.Type == model.ItemTypeConsume { // 消耗品
-				useLog, used := s.useItem(item.UUid)
+				useLog, used := s.useConsumeItem(item.UUid)
 				msg += useLog
 				if used {
 					// 使用成功则减掉数量 1
 					bag.Items[ind].Count -= 1
-					cleanBagCountZeroItem(bag)
+					bag = cleanBagCountZeroItem(bag)
 				}
+			} else if item.Type == model.ItemTypeMaterial { // 材料
+
 			}
 			break
 		}
@@ -115,14 +140,15 @@ func (s *BagService) UseBagItem(id int64) string {
 	return msg
 }
 
-// useItem 使用指定ID的物品，根据物品ID对用户属性进行修改，并可能触发随机事件。
-// 参数:
-//   - id: 物品ID，决定使用哪种物品及其效果
+// useConsumeItem 使用指定ID的物品(消耗品类型)，根据物品ID对用户属性进行修改，并可能触发随机事件。
+//
+//		参数:
+//	  - id: 物品ID，决定使用哪种物品及其效果
 //
 // 返回值:
 //   - string: 操作结果的消息描述
 //   - bool: 操作是否成功执行
-func (s *BagService) useItem(id int64) (string, bool) {
+func (s *BagService) useConsumeItem(id int64) (string, bool) {
 	var msg string
 	user := getLocalUser()
 
@@ -184,7 +210,6 @@ func (s *BagService) useItem(id int64) (string, bool) {
 		gold := utils.GetRandomInt64(1, utils.Max(user.Level, 150))
 		user.Gold += gold
 		msg = msg + "好运连连 获得金币 " + fmt.Sprint(gold) + "枚. "
-
 	case 9:
 		msg = msg + "气息更加绵长了."
 		user.HpLimit += 10
@@ -276,4 +301,80 @@ func (s *BagService) checkGoodsLimit(user *model.User, goodsId int64) bool {
 	}
 
 	return true
+}
+
+func (s *BagService) userMaterialItem(uuid int64, bag *model.Bag) (string, bool) {
+	var (
+		msg  string
+		used bool
+	)
+
+	if uuid == 14 || uuid == 15 {
+		if uuid == 14 {
+			if !s.checkBagHasItem(bag, 15) {
+				msg += "你好像没有`精魄`, 合成法器失败..."
+				return msg, used
+			}
+		} else {
+			if !s.checkBagHasItem(bag, 14) {
+				msg += "你好像没有`玄晶`, 合成法器失败..."
+				return msg, used
+			}
+		}
+		bag = s.reduceItem(bag, 14)
+		bag = s.reduceItem(bag, 15)
+		// 合成装备
+		//equip := model.RandomEquip()
+
+	} else {
+		msg += " 这是仍未被发现的材料... 你还不知道怎么使用它"
+	}
+
+	return msg, used
+}
+
+// reduceItem 减少背包中指定物品的数量
+// 该函数会查找背包中UUID匹配的物品，将其数量减1，如果物品数量变为0则清理该物品
+//
+// 参数:
+//
+//	bag - 背包对象指针，包含物品列表
+//	uuid - 要减少的物品的唯一标识符
+//
+// 返回值:
+//
+//	返回更新后的背包对象指针
+func (s *BagService) reduceItem(bag *model.Bag, uuid int64) *model.Bag {
+	// 遍历背包中的所有物品，查找匹配UUID的物品
+	for i, item := range bag.Items {
+		if item.UUid == uuid {
+			// 如果物品数量大于0，则减少1个
+			if item.Count > 0 {
+				bag.Items[i].Count--
+				// 清理背包中数量为0的物品
+				bag = cleanBagCountZeroItem(bag)
+			}
+			return bag
+		}
+	}
+	return bag
+}
+
+// checkBagHasItem 检查背包中是否包含指定UUID且数量大于0的物品
+//
+//		参数:
+//	  - bag: 要检查的背包对象
+//	  - uuid: 要查找的物品UUID
+//
+// 返回值:
+//   - bool: 如果找到UUID匹配且数量大于0的物品则返回true，否则返回false
+func (s *BagService) checkBagHasItem(bag *model.Bag, uuid int64) bool {
+	// 遍历背包中的所有物品
+	for _, item := range bag.Items {
+		// 检查物品UUID是否匹配且数量大于0
+		if item.UUid == uuid && item.Count > 0 {
+			return true
+		}
+	}
+	return false
 }
