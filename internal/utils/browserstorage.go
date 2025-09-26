@@ -46,7 +46,3 @@ func DeleteStorage(key string) {
 		localStorage.Call("removeItem", key)
 	}
 }
-
-const (
-	UserInfoStorageKey = "_Path_2_Immortality_User_"
-)

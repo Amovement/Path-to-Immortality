@@ -1,6 +1,3 @@
-//go:build js && wasm
-// +build js,wasm
-
 package internal
 
 import (
@@ -14,6 +11,7 @@ type Core struct {
 	ChallengeService *service.ChallengeService
 	UserService      *service.UserService
 	GoodsService     *service.GoodsService
+	BagService       *service.BagService
 }
 
 func NewCore() *Core {
@@ -22,6 +20,7 @@ func NewCore() *Core {
 		ChallengeService: service.NewChallengeService(),
 		UserService:      service.NewUserService(),
 		GoodsService:     service.NewGoodsService(),
+		BagService:       service.NewBagService(),
 	}
 }
 
@@ -102,4 +101,14 @@ func (c *Core) Restart(this js.Value, args []js.Value) interface{} {
 // ------------ 版本类 ---------------------
 func (c *Core) GetVersion(this js.Value, args []js.Value) interface{} {
 	return c.VersionService.GetVersion()
+}
+
+// ------------ 背包类 ---------------------
+func (c *Core) GetBag(this js.Value, args []js.Value) interface{} {
+	return c.BagService.GetBag()
+}
+
+func (c *Core) UseBagItem(this js.Value, args []js.Value) interface{} {
+	id := args[0].Int()
+	return c.BagService.UseBagItem(int64(id))
 }

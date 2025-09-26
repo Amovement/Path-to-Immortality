@@ -1,42 +1,16 @@
-//go:build js && wasm
-// +build js,wasm
-
 package main
 
 import (
 	"github.com/Amovement/Path-to-Immortality-WASM/internal"
-	"syscall/js"
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/register"
 )
-
-func registerGoodsCallbacks(core *internal.Core) {
-	js.Global().Set("getGoodsList", js.FuncOf(core.GetGoodsList))
-	js.Global().Set("buyGoods", js.FuncOf(core.BuyGoods))
-}
-
-func registerUserCallbacks(core *internal.Core) {
-	js.Global().Set("getUserInfo", js.FuncOf(core.GetUserInfo))
-	js.Global().Set("setUsername", js.FuncOf(core.SetUsername))
-	js.Global().Set("allocate", js.FuncOf(core.Allocate))
-	js.Global().Set("heal", js.FuncOf(core.Heal))
-	js.Global().Set("cultivation", js.FuncOf(core.Cultivation))
-	js.Global().Set("getGold", js.FuncOf(core.GetGold))
-	js.Global().Set("restart", js.FuncOf(core.Restart))
-}
-
-func registerChallengeCallbacks(core *internal.Core) {
-	js.Global().Set("listChallenge", js.FuncOf(core.ListChallenge))
-	js.Global().Set("joinChallenge", js.FuncOf(core.JoinChallenge))
-}
-
-func registerVersionCallbacks(core *internal.Core) {
-	js.Global().Set("getVersion", js.FuncOf(core.GetVersion))
-}
 
 func main() {
 	core := internal.NewCore()
-	registerUserCallbacks(core)
-	registerChallengeCallbacks(core)
-	registerVersionCallbacks(core)
-	registerGoodsCallbacks(core)
+	register.RegisterUserCallbacks(core)
+	register.RegisterChallengeCallbacks(core)
+	register.RegisterVersionCallbacks(core)
+	register.RegisterGoodsCallbacks(core)
+	register.RegisterBagCallbacks(core)
 	<-make(chan struct{}) // 保持运行
 }

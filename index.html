@@ -65,11 +65,7 @@
         <div class="lg:col-span-1">
             <div class="bg-dark-200 rounded-xl p-5 card-shadow low-key-hover border border-dark-300">
                 <!-- 原页面内容区域（示例按钮，用于打开商城） -->
-                <div class="">
-                    <h2 class="text-lg font-bold mb-4 flex items-center">
-                        <i class="fa fa-user-circle text-primary mr-2"></i>用户信息
-                    </h2>
-                </div>
+
 
 
                 <div id="userInfo" class="space-y-3">
@@ -132,14 +128,14 @@
             <div class="bg-dark-200 rounded-xl p-5 card-shadow mt-5 low-key-hover border border-dark-300">
 
                 <div class="space-y-2">
-                    <button onclick="healBtn()"
-                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
-                        <i class="fa fa-heartbeat"></i>恢复健康
-                    </button>
-
                     <button onclick="cultivationBtn()"
                             class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
                         <i class="fa fa-level-up"></i>潜心修炼
+                    </button>
+
+                    <button onclick="healBtn()"
+                            class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <i class="fa fa-heartbeat"></i>恢复健康
                     </button>
 
                     <button onclick="getGoldBtn()"
@@ -175,15 +171,17 @@
         <div class="lg:col-span-2">
             <div class="bg-dark-200 rounded-xl p-5 card-shadow low-key-hover border border-dark-300 h-full">
                 <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-lg font-bold flex items-center">
-                        <i class="fa fa-chevron-down text-accent mr-2"></i>控制面板
-                    </h2>
+
                     <button onclick="listChallengeBtn()" class="ml-auto btn btn-primary">
-                        <i class="fa fa-fire"></i>刷新挑战
+                        <i class="fa fa-fire"></i>挑战
                     </button>
 
                     <button onclick="openShopModal()" class="ml-auto btn btn-primary">
-                        <i class="fa fa-shopping-bag"></i>刷新集市
+                        <i class="fa fa-shopping-cart"></i>集市
+                    </button>
+
+                    <button onclick="openBag()" class="ml-auto btn btn-primary">
+                        <i class="fa fa-shopping-bag"></i>背包
                     </button>
                 </div>
 
@@ -221,6 +219,7 @@
         <div class="flex items-center gap-2">
             <i class="fa fa-gamepad text-primary/70"></i> <!-- 游戏图标 -->
             <span>一个摸鱼🐟的小游戏 | Path-to-Immortality</span>
+            <span id="busuanzi_container_site_pv"> | 当前修士人数 <span id="busuanzi_value_site_uv"></span></span>
         </div>
         <!-- 右侧仓库链接（强化hover效果） -->
         <a href="https://github.com/Amovement/Path-to-Immortality"
@@ -259,7 +258,117 @@
 </div>
 
 <script src="wasm_exec.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
+    function openBag(){
+        try {
+            // 调用Wasm暴露的获取商品列表的函数
+            if (typeof getBag !== 'function') {
+                return;
+            }
+
+            const backpackJson = getBag()
+            const backpackData = JSON.parse(backpackJson);
+            renderBackpackItems(backpackData);
+
+
+        } catch (e) {
+            showToast('加载背包失败: ' + e.message, true);
+            console.error('加载背包失败:', e);
+            // 显示错误状态
+            document.getElementById('challengeList').innerHTML = `
+                    <div class="text-center text-dark-400 py-10">
+                        <i class="fa fa-exclamation-triangle text-danger text-xl mb-2"></i>
+                        <p>无法加载背包，请重试</p>
+                        <button onclick="loadAllGoods()" class="mt-2 text-primary text-sm hover:underline">
+                            重试
+                        </button>
+                    </div>
+                `;
+        }
+    }
+
+    // 渲染背包物品列表
+    function renderBackpackItems(backpackData) {
+        const backpackElement = document.getElementById('challengeList'); // 假设背包容器ID为backpackList
+
+        const itemsList = backpackData.Items;
+
+        // 空背包状态
+        if (itemsList==null || itemsList.length === 0) {
+            backpackElement.innerHTML = `
+            <div class="text-center text-dark-400 py-10">
+                <i class="fa fa-briefcase text-xl mb-2"></i>
+                <p>背包空空如也</p>
+            </div>
+        `;
+            return;
+        }
+
+        // 渲染物品列表
+        let html = '';
+        itemsList.forEach(item => {
+            // 从物品数据获取属性，添加默认值
+            const id = item.uuid || 0;
+            const name = item.name || '未知物品';
+            const description = item.description || '暂无描述';
+            const count = item.count || 0;
+            const type = item.type || 0;
+
+            // 根据物品名称自动选择图标
+            let iconClass = 'fa-cube'; // 默认图标
+            if (name.includes('丹') || name.includes('血') || name.includes('散') || name.includes('气')) {
+                iconClass = 'fa-flask'; // 丹药类
+            } else if (name.includes('剑') || name.includes('刀') || name.includes('武器')) {
+                iconClass = 'fa-sword'; // 武器类
+            } else if (name.includes('甲') || name.includes('皮') || name.includes('防')) {
+                iconClass = 'fa-shield'; // 防具类
+            } else if (name.includes('书') || name.includes('秘籍') || name.includes('心法')) {
+                iconClass = 'fa-book'; // 秘籍类
+            }
+
+            // 物品数量标签（超过1个才显示）
+            const countBadge = count > 1 ?
+                `<span class="absolute -top-1 -right-1 bg-accent text-dark-100 text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                ${count}
+            </span>` : '';
+
+            html += `
+            <div class="flex flex-col md:flex-row gap-4 p-4 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
+                <div class="w-full md:w-24 h-24 bg-dark-300 rounded flex items-center justify-center relative">
+                    <i class="fa ${iconClass} text-3xl text-accent"></i>
+                    ${countBadge}
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between">
+                        <h3 class="font-bold">${name}</h3>
+                        ${type === 0 ? '<span class="text-primary text-sm px-2 py-0.5 rounded bg-primary/10">消耗品</span>' : ''}
+                    </div>
+                    <p class="text-dark-400 text-sm mt-1 whitespace-pre-line">
+                        ${description}
+                    </p>
+                    <div class="mt-3 flex justify-end">
+                        <button onclick="useBagItemBtn(${id})" class=" text-gray-100 px-3 py-1 rounded hover:bg-secondary text-sm transition-colors">
+                            <i class="fa fa-plus-circle"></i>使用
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        });
+
+        backpackElement.innerHTML = html;
+        showToast(`背包中有 ${itemsList.length} 种物品`);
+    }
+
+    function useBagItemBtn(item) {
+        const result = useBagItem(item);
+        showToast(result);
+        addToLog(result);
+        openBag();
+        refreshUserInfo();
+    }
+
     // 加载商品
     function openShopModal() {
         // 获取商品列表
@@ -290,7 +399,7 @@
             showToast('加载商品失败: ' + e.message, true);
             console.error('加载商品错误:', e);
             // 显示错误状态
-            document.getElementById('goodsList').innerHTML = `
+            document.getElementById('challengeList').innerHTML = `
                     <div class="text-center text-dark-400 py-10">
                         <i class="fa fa-exclamation-triangle text-danger text-xl mb-2"></i>
                         <p>无法加载商品，请重试</p>
@@ -319,7 +428,7 @@
         let html = '';
         goodsList.forEach(goods => {
             // 从Goods结构体获取属性，添加默认值
-            const id = goods.id || 0;
+            const id = goods.uuid || 0;
             const name = goods.name || '未知商品';
             const description = goods.description || '暂无描述';
             const price = goods.price || 0;
@@ -345,7 +454,7 @@
                                 ${description}
                             </p>
                             <div class="mt-3 flex justify-end">
-                                <button onclick="buyGoodsBtn(${id})" class="bg-primary/80 text-gray-100 px-3 py-1 rounded hover:bg-primary text-sm transition-colors">
+                                <button onclick="buyGoodsBtn(${id})" class="text-gray-100 px-3 py-1 rounded hover:bg-primary text-sm transition-colors">
                                     <i class="fa fa-shopping-cart mr-1"></i>购买
                                 </button>
                             </div>
@@ -424,7 +533,7 @@
             const go = new Go();
 
             // 2. 加载WASM文件（先转为ArrayBuffer确保兼容性）
-            const response = await fetch('main-alpha-0.0.6.wasm');
+            const response = await fetch('main-alpha-0.0.7.wasm');
             if (!response.ok) {
                 throw new Error(`加载失败: ${response.status} ${response.statusText}`);
             }
@@ -445,7 +554,8 @@
             showVersion();
             // 初始化完成后获取用户信息
             setTimeout(refreshUserInfo, 500);
-            setTimeout(showVersion,2000);
+            showVersion();
+            await listChallengeBtn();
             showToast('修炼系统加载完成，欢迎使用！');
         } catch (error)  {
             console.error('Wasm初始化失败:', error);
@@ -549,17 +659,6 @@
             showToast('用户名已更新');
         } catch (e) {
             showToast('设置失败: ' + e.message, true);
-        }
-    }
-
-    async function restartBtn() {
-        const result = restart();
-        refreshUserInfo();
-        showToast(result);
-        addToLog(`转生: ${result}`);
-        const btn = document.getElementById('restartB');
-        if (btn) {
-            btn.classList.add('hidden'); // 添加隐藏类
         }
     }
 
@@ -672,7 +771,7 @@
             // 6. 循环生成挑战项（给每个属性加默认值，避免缺失属性报错）
             let html = '';
             challengeList.forEach((challenge, index) => {
-                const id = challenge.id || `default-${index}`; // 用索引当默认ID，避免空值
+                const id = challenge.id || `${index}`; // 用索引当默认ID，避免空值
                 const name = challenge.title || `未知挑战-${index + 1}`;
                 const reward = challenge.reward || '无奖励';
                 const description = challenge.description || '暂无挑战描述';
@@ -685,7 +784,7 @@
                             <p class="text-dark-400 text-sm">奖励: ${reward}</p>
                         </div>
                         <button onclick="joinChallengeBtn(${id})"
-                            class="bg-accent/20 text-accent px-3 py-1 rounded hover:bg-accent/30 transition-colors text-sm">
+                            class=" text-accent px-3 py-1 rounded hover:bg-accent/30 transition-colors text-sm">
                             接受挑战
                         </button>
                     </div>

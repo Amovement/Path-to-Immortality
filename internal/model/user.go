@@ -18,6 +18,9 @@ type User struct {
 }
 
 const (
+	UserInfoStorageKey = "_Path_2_Immortality_User_"
+	UserOperatorLock   = "stat:lock"
+
 	DefaultHp = 10
 )
 

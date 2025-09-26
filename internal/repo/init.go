@@ -67,6 +67,8 @@ var monsters = []model.Monster{
 
 // Challenges 50个挑战任务（每5级一个梯度，覆盖1-250级）
 var Challenges = []model.Challenge{
+	{ID: 0, LevelLimit: 30, Title: "每日功课 - 心魔", Gold: 5000}, // 福利局
+
 	{ID: 1, LevelLimit: 30, Title: "新手林地试炼", Gold: 100},   // 1级
 	{ID: 2, LevelLimit: 30, Title: "乱葬岗清剿", Gold: 300},    // 5级
 	{ID: 3, LevelLimit: 30, Title: "黑风洞探秘", Gold: 500},    // 10级
@@ -199,22 +201,19 @@ var challengeMonsters = []model.ChallengeMonster{
 
 // Goods 商品
 var Goods = []model.Goods{
-	{ID: 1, Name: "下品淬体丹", Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险,长期服用存在耐药性"},
-	{ID: 2, Name: "下品莽牛血", Price: 50, Description: "增加一点攻击，存在灵力反噬风险,长期服用存在耐药性"},
-	{ID: 3, Name: "下品玄龟甲", Price: 50, Description: "增加一点防御，存在灵力反噬风险,长期服用存在耐药性"},
-	{ID: 4, Name: "下品灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
-
-	{ID: 5, Name: "逍遥散", Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
-	{ID: 6, Name: "修为丹", Price: 20, Description: "增加十点经验"},
-	{ID: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复十五点生命值"},
-	{ID: 8, Name: "金币罐子", Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
-
-	{ID: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{ID: 10, Name: "上品莽牛血", Price: 5000, Description: "增加两点攻击，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{ID: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{ID: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
-
-	{ID: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
+	{UUid: 1, Name: "下品淬体丹", Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 2, Name: "下品莽牛血", Price: 50, Description: "增加一点攻击，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 3, Name: "下品玄龟甲", Price: 50, Description: "增加一点防御，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 4, Name: "下品灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 5, Name: "逍遥散", Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
+	{UUid: 6, Name: "修为丹", Price: 20, Description: "增加十点经验"},
+	{UUid: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复十五点生命值"},
+	{UUid: 8, Name: "金币罐子", Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
+	{UUid: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 10, Name: "上品莽牛血", Price: 5000, Description: "增加两点攻击，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
 }
 
 var MonsterMap map[uint]model.Monster
@@ -239,7 +238,7 @@ func init() {
 		ChallengeMonsterMap[uint(ind+1)] = v
 	}
 	for _, v := range Goods {
-		GoodsMap[v.ID] = v
+		GoodsMap[v.UUid] = v
 	}
 
 }

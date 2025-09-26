@@ -24,7 +24,7 @@ func NewUserService() *UserService {
 // getLocalUser 获取本地用户
 func getLocalUser() *model.User {
 	user := model.NewUser()
-	userInfo, existed := utils.GetStorage(utils.UserInfoStorageKey)
+	userInfo, existed := utils.GetStorage(model.UserInfoStorageKey)
 	if existed {
 		if IsProd() {
 			userInfo, _ = utils.Decrypt(userInfo)
@@ -43,14 +43,14 @@ func updateUserInfo(user *model.User) {
 	userBytes, _ := json.Marshal(user)
 	userString := string(userBytes)
 	if IsProd() {
-		userStringEncrypted, err := utils.Encrypt(string(userBytes))
+		userStringEncrypted, err := utils.Encrypt(userString)
 		if err != nil {
 			fmt.Printf("[ERROR] %+v\n", err)
 			return
 		}
 		userString = userStringEncrypted
 	}
-	utils.SetStorage(utils.UserInfoStorageKey, userString)
+	utils.SetStorage(model.UserInfoStorageKey, userString)
 }
 
 // GetUserInfo 获取本地用户信息
@@ -126,7 +126,7 @@ func (s *UserService) Allocate(stat string) string {
 // 该函数用于恢复用户血量，治疗和修炼共用时间限制
 // 返回值：治疗结果的描述信息
 func (s *UserService) Heal() string {
-	key := fmt.Sprintf("stat:lock") // 角色属性锁
+	key := model.UserOperatorLock // 角色属性锁
 	if _, ok := CacheRedis.Load(key); ok {
 		return "请求过于频繁"
 	}
@@ -159,7 +159,7 @@ func (s *UserService) Heal() string {
 }
 
 func (s *UserService) Cultivation() string {
-	key := fmt.Sprintf("stat:lock") // 角色属性锁
+	key := model.UserOperatorLock // 角色属性锁
 	if _, ok := CacheRedis.Load(key); ok {
 		return "请求过于频繁"
 	}
@@ -177,7 +177,7 @@ func (s *UserService) Cultivation() string {
 
 	endTime = time.Now().Add(utils.GetRandomMinutes(1, int(user.Level))).Unix()
 	user.NextCultivationTime = endTime
-	user.Exp = user.Exp + utils.GetRandomInt64(1, 5)
+	user.Exp = user.Exp + utils.GetRandomInt64(1, 5) + user.RestartCount
 	if user.Exp >= user.Level*10 { // 升级嘞
 		// 检查用户是否达到破境要求
 		if userIsBrokenLevel(user) {
@@ -206,7 +206,7 @@ func (s *UserService) Cultivation() string {
 
 // GetGold 打工赚钱
 func (s *UserService) GetGold() string {
-	key := fmt.Sprintf("stat:lock") // 角色属性锁
+	key := model.UserOperatorLock // 角色属性锁
 	if _, ok := CacheRedis.Load(key); ok {
 		return "请求过于频繁"
 	}
@@ -224,7 +224,7 @@ func (s *UserService) GetGold() string {
 
 	endTime = time.Now().Add(utils.GetRandomMinutes(1, int(user.Level))).Unix()
 	user.NextCultivationTime = endTime
-	getGold := 10 + utils.GetRandomInt64(1, 10)
+	getGold := 10 + utils.GetRandomInt64(1, user.Level) + user.Level + user.RestartCount
 	user.Gold += getGold
 	msg = "恭喜你, 获得金币: " + fmt.Sprint(getGold) + " 枚"
 	// 更新用户

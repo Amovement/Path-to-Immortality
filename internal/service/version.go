@@ -2,7 +2,7 @@ package service
 
 var (
 	appMode = "prod"
-	version = "alpha-0.0.6"
+	version = "alpha-0.0.7"
 )
 
 type VersionService struct {

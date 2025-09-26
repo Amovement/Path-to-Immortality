@@ -96,6 +96,19 @@ func (s *ChallengeService) LoadChallenge(challengeId uint) (types.ListChallengeI
 		}
 	}
 
+	if challengeId == 0 { // 特判每日挑战 - 心魔
+		user := getLocalUser()
+		monsters = append(monsters, types.Monster{
+			Attack:      user.Attack,
+			Defense:     user.Defense,
+			Hp:          user.Hp,
+			HpLimit:     user.HpLimit,
+			Name:        user.Username + "的心魔",
+			Speed:       user.Speed,
+			Cultivation: utils.GetCultivationByLevel(int(user.Level)),
+		})
+	}
+
 	// 构造奖励字符串
 	rewards := fmt.Sprintf("金币 %d 枚", challenge.Gold)
 	description := "挑战内容: \n" // 怪物群的描述

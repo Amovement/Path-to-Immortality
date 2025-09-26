@@ -15,6 +15,9 @@ import (
 //
 //	a random int64 number in the range [min, max)
 func GetRandomInt64(min, max int64) int64 {
+	if max <= min {
+		return min
+	}
 	return min + int64(rand.Intn(int(max-min)))
 }
 
