@@ -11,6 +11,7 @@ type User struct {
 	Level               int64           `json:"level"`               // 等级
 	Gold                int64           `json:"gold"`                // 金币
 	Potential           int64           `json:"potential"`           // 潜能
+	EquipArr            []int64         `json:"equipArr"`            // 装备在身上的法器
 	NextCultivationTime int64           `json:"nextCultivationTime"` // 治疗和修炼占用同一个时间
 	PassedChallengeId   []uint          `json:"passedChallengeId"`   // 通过的挑战 ID
 	PassedChallengeTime map[uint]string `json:"passedChallengeTime"` // 通过的 Challenge 时间

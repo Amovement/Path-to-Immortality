@@ -41,8 +41,8 @@ func (s *GoodsService) BuyGoods(goodsId int) string {
 	//	{UUid: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
 	//	{UUid: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
 	//	{UUid: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
-
-	addBagItem(&model.Item{
+	bag := getLocalBag()
+	bag = addBagItem(bag, &model.Item{
 		UUid:        int64(goods.UUid),
 		Name:        goods.Name,
 		Description: goods.Description,

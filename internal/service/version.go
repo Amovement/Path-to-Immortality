@@ -1,7 +1,7 @@
 package service
 
 var (
-	appMode = "prod"
+	appMode = "dev"
 	version = "alpha-0.0.7"
 )
 

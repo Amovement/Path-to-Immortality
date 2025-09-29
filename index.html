@@ -128,17 +128,17 @@
             <div class="bg-dark-200 rounded-xl p-5 card-shadow mt-5 low-key-hover border border-dark-300">
 
                 <div class="space-y-2">
-                    <button onclick="cultivationBtn()"
+                    <button id="cultivationBtn" onclick="cultivationBtn()"
                             class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
                         <i class="fa fa-level-up"></i>潜心修炼
                     </button>
 
-                    <button onclick="healBtn()"
+                    <button id="healBtn" onclick="healBtn()"
                             class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
                         <i class="fa fa-heartbeat"></i>恢复健康
                     </button>
 
-                    <button onclick="getGoldBtn()"
+                    <button id="getGoldBtn" onclick="getGoldBtn()"
                             class="w-full flex items-center justify-center gap-2 bg-gray-800/50 text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors">
                         <i class="fa fa-money"></i>做工赚钱
                     </button>
@@ -182,6 +182,10 @@
 
                     <button onclick="openBag()" class="ml-auto btn btn-primary">
                         <i class="fa fa-shopping-bag"></i>背包
+                    </button>
+
+                    <button onclick="listEquip()" class="ml-auto btn btn-primary">
+                        <i class="fa fa-shopping-bag"></i>法器
                     </button>
                 </div>
 
@@ -259,261 +263,12 @@
 
 <script src="wasm_exec.js"></script>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<script>
-    function openBag(){
-        try {
-            // 调用Wasm暴露的获取商品列表的函数
-            if (typeof getBag !== 'function') {
-                return;
-            }
-
-            const backpackJson = getBag()
-            const backpackData = JSON.parse(backpackJson);
-            renderBackpackItems(backpackData);
-
-
-        } catch (e) {
-            showToast('加载背包失败: ' + e.message, true);
-            console.error('加载背包失败:', e);
-            // 显示错误状态
-            document.getElementById('challengeList').innerHTML = `
-                    <div class="text-center text-dark-400 py-10">
-                        <i class="fa fa-exclamation-triangle text-danger text-xl mb-2"></i>
-                        <p>无法加载背包，请重试</p>
-                        <button onclick="loadAllGoods()" class="mt-2 text-primary text-sm hover:underline">
-                            重试
-                        </button>
-                    </div>
-                `;
-        }
-    }
-
-    // 渲染背包物品列表
-    function renderBackpackItems(backpackData) {
-        const backpackElement = document.getElementById('challengeList'); // 假设背包容器ID为backpackList
-
-        const itemsList = backpackData.Items;
-
-        // 空背包状态
-        if (itemsList==null || itemsList.length === 0) {
-            backpackElement.innerHTML = `
-            <div class="text-center text-dark-400 py-10">
-                <i class="fa fa-briefcase text-xl mb-2"></i>
-                <p>背包空空如也</p>
-            </div>
-        `;
-            return;
-        }
-
-        // 渲染物品列表
-        let html = '';
-        itemsList.forEach(item => {
-            // 从物品数据获取属性，添加默认值
-            const id = item.uuid || 0;
-            const name = item.name || '未知物品';
-            const description = item.description || '暂无描述';
-            const count = item.count || 0;
-            const type = item.type || 0;
-
-            // 根据物品名称自动选择图标
-            let iconClass = 'fa-cube';
-
-            // 物品数量标签（超过1个才显示）
-            const countBadge = count > 1 ?
-                `<span class="absolute -top-1 -right-1 bg-accent text-dark-100 text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                ${count}
-            </span>` : '';
-
-            html += `
-            <div class="flex flex-col md:flex-row gap-1 p-1 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
-                <div class="w-full md:w-1 h-1 bg-dark-300 rounded flex items-center justify-center relative">
-
-                    ${countBadge}
-                </div>
-                <div class="flex-1">
-                    <div class="flex justify-between">
-                        <h3 class="font-bold">${name}</h3>
-                        ${type === 0 ? '<span class="text-primary text-sm px-1 py-0.5 rounded bg-primary/10">消耗品</span>' : ''}
-                    </div>
-                    <!-- 减少描述文本的上下间距 -->
-                    <p class="text-dark-400 text-xs md:text-sm mt-1 mb-2 whitespace-pre-line">
-                        ${description}
-                    </p>
-                    <div class="mt-1 flex justify-end">
-                        <button onclick="useBagItemBtn(${id})" class=" text-gray-100 px-1 py-1 rounded hover:bg-secondary text-sm transition-colors">
-                            <i class="fa fa-plus-circle"></i>使用
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        });
-
-        backpackElement.innerHTML = html;
-        showToast(`背包中有 ${itemsList.length} 种物品`);
-    }
-
-    function useBagItemBtn(item) {
-        const result = useBagItem(item);
-        showToast(result);
-        addToLog(result);
-        openBag();
-        refreshUserInfo();
-    }
-
-    // 加载商品
-    function openShopModal() {
-        // 获取商品列表
-        loadAllGoods(); // 加载所有商品
-    }
-
-    // 从Wasm加载所有商品
-    function loadAllGoods() {
-        try {
-            // 调用Wasm暴露的获取商品列表的函数
-            if (typeof getGoodsList !== 'function') {
-                showToast('商品接口未加载', true);
-                return;
-            }
-
-            const goodsListStr = getGoodsList();
-            const goodsList = JSON.parse(goodsListStr);
-
-            // 检查是否是数组
-            if (!Array.isArray(goodsList)) {
-                showToast('商品数据格式错误', true);
-                console.error('商品数据不是数组:', goodsList);
-                return;
-            }
-
-            renderGoodsList(goodsList);
-        } catch (e) {
-            showToast('加载商品失败: ' + e.message, true);
-            console.error('加载商品错误:', e);
-            // 显示错误状态
-            document.getElementById('challengeList').innerHTML = `
-                    <div class="text-center text-dark-400 py-10">
-                        <i class="fa fa-exclamation-triangle text-danger text-xl mb-2"></i>
-                        <p>无法加载商品，请重试</p>
-                        <button onclick="loadAllGoods()" class="mt-2 text-primary text-sm hover:underline">
-                            重试
-                        </button>
-                    </div>
-                `;
-        }
-    }
-
-    // 渲染商品列表
-    function renderGoodsList(goodsList) {
-        const goodsListElement = document.getElementById('challengeList');
-
-        if (goodsList.length === 0) {
-            goodsListElement.innerHTML = `
-                    <div class="text-center text-dark-400 py-10">
-                        <i class="fa fa-frown-o text-xl mb-2"></i>
-                        <p>当前暂无商品</p>
-                    </div>
-                `;
-            return;
-        }
-
-        let html = '';
-        goodsList.forEach(goods => {
-            // 从Goods结构体获取属性，添加默认值
-            const id = goods.uuid || 0;
-            const name = goods.name || '未知商品';
-            const description = goods.description || '暂无描述';
-            const price = goods.price || 0;
-
-            // 根据商品名称自动选择图标（可根据实际情况调整）
-            let iconClass = 'fa-cube'; // 默认图标
-
-            html += `
-                    <div class="flex flex-col md:flex-row gap-1 p-1 bg-dark-100 rounded-lg border border-dark-300 shop-item-hover">
-                        <!-- 缩小图标容器尺寸 -->
-                        <div class="w-full md:w-1 h-1 bg-dark-300 rounded flex items-center justify-center">
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex justify-between">
-                                <h3 class="font-bold text-sm md:text-base">${name}</h3>
-                                <span class="text-secondary font-medium text-sm">${price} 金</span>
-                            </div>
-                            <!-- 减少描述文本的上下间距 -->
-                            <p class="text-dark-400 text-xs md:text-sm mt-1 mb-2 whitespace-pre-line">
-                                ${description}
-                            </p>
-                            <div class="flex justify-end">
-                                <!-- 缩小按钮尺寸 -->
-                                <button onclick="buyGoodsBtn(${id})" class="text-gray-100 px-1 py-1 rounded hover:bg-primary text-xs transition-colors">
-                                    <i class="fa fa-shopping-cart mr-1"></i>购买
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-        });
-
-        goodsListElement.innerHTML = html;
-        showToast(`已加载 ${goodsList.length} 个商品`);
-    }
-
-    // 购买商品
-    function buyGoodsBtn(goodsId) {
-        try {
-            // 调用Wasm的购买接口
-            if (typeof buyGoods !== 'function') {
-                console.log('buyGoods is not a function')
-                return;
-            }
-
-            // 调用购买函数，传入商品ID
-            const result = buyGoods(goodsId);
-
-            // 返回格式为 '"金币不足"'
-            addToLog(`购买结果: ${result}`);
-            refreshUserInfo(); // 刷新用户信息
-            showToast(result,true);
-        } catch (e) {
-            showToast('购买失败: ' + e.message, true);
-            console.error('购买商品错误:', e);
-        }
-    }
-</script>
-
-<script>
-    // 显示确认模态框
-    function showRestartConfirm() {
-        const modal = document.getElementById('restartConfirmModal');
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-    }
-
-    // 隐藏确认模态框
-    function hideRestartConfirm() {
-        const modal = document.getElementById('restartConfirmModal');
-        modal.classList.add('opacity-0', 'pointer-events-none');
-    }
-
-    // 确认转生（原restartBtn逻辑）
-    async function confirmRestart() {
-        // 先隐藏确认框
-        hideRestartConfirm();
-
-        // 执行转生逻辑
-        const result = restart();
-        refreshUserInfo();
-        showToast(result);
-        addToLog(`转生: ${result}`);
-
-        // 隐藏转生按钮
-        const btn = document.getElementById('restartB');
-        if (btn) {
-            btn.classList.add('hidden');
-        }
-    }
-
-    // 修改原按钮点击事件为显示确认框
-    // 注意：按钮的onclick已改为showRestartConfirm()
-</script>
+<script src="js/bag.js"></script>
+<script src="js/goods.js"></script>
+<script src="js/equip.js"></script>
+<script src="js/restart.js"></script>
+<script src="js/challenge.js"></script>
+<script src="js/user.js"></script>
 
 <script>
     // 初始化并加载WASM
@@ -547,6 +302,7 @@
             showVersion();
             await listChallengeBtn();
             showToast('修炼系统加载完成，欢迎使用！');
+            addToLog('修炼系统加载完成，欢迎使用！')
         } catch (error)  {
             console.error('Wasm初始化失败:', error);
             const loader = document.getElementById('wasmLoader');
@@ -592,235 +348,6 @@
         setTimeout(() => {
             toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 z-50 bg-dark-200 border border-dark-300';
         }, 5000);
-    }
-
-    // 用户信息相关函数
-    function refreshUserInfo() {
-        try {
-            if (typeof getUserInfo !== 'function') {
-                showToast('接口未加载', true);
-                return;
-            }
-
-            const userInfoStr = getUserInfo();
-            const userInfo = JSON.parse(userInfoStr);
-
-            document.getElementById('username').textContent = userInfo.username || '未设置';
-            document.getElementById('cultivation').textContent = userInfo.cultivation ;
-            document.getElementById('hp').textContent = userInfo.hp + '/' + userInfo.hpLimit;
-            document.getElementById('attack').textContent = userInfo.attack || '0';
-            document.getElementById('defense').textContent = userInfo.defense || '0';
-            document.getElementById('speed').textContent = userInfo.speed || '0';
-            document.getElementById('exp').textContent = userInfo.exp  + '/' + userInfo.level*10; // 转为数字
-            document.getElementById('potential').textContent = userInfo.potential || '0';
-            document.getElementById('gold').textContent = userInfo.gold || '0';
-
-            const btn = document.getElementById('restartB');
-            if (btn) {
-                if(userInfo.level>=150){
-                    btn.classList.remove('hidden');
-                }else{
-                    btn.classList.add('hidden'); // 添加隐藏类
-                }
-            }
-
-            showToast('信息已刷新');
-        } catch (e) {
-            showToast('获取信息失败: ' + e.message, true);
-        }
-    }
-
-    async function setUsernameBtn() {
-        const newUsername = document.getElementById('newUsername').value.trim();
-        if (!newUsername) {
-            showToast('请输入用户名', true);
-            return;
-        }
-
-        try {
-            if (typeof setUsername !== 'function') {
-                showToast('接口未加载', true);
-                return;
-            }
-
-            setUsername(newUsername);
-            document.getElementById('newUsername').value = '';
-            refreshUserInfo();
-            showToast('用户名已更新');
-        } catch (e) {
-            showToast('设置失败: ' + e.message, true);
-        }
-    }
-
-    // 分配属性点
-    async function allocateBtn(stat) {
-        try {
-            if (typeof allocate !== 'function') {
-                showToast('接口未加载', true);
-                return;
-            }
-
-            const result = allocate(stat);
-            refreshUserInfo();
-            showToast(result);
-            addToLog(`分配潜能点: ${result}`);
-        } catch (e) {
-            showToast('操作失败: ' + e.message, true);
-        }
-    }
-
-    async function healBtn() {
-        try {
-            if (typeof heal !== 'function') {
-                showToast('接口未加载', true);
-                return;
-            }
-
-            const result = heal();
-            refreshUserInfo();
-            showToast(result);
-            addToLog(`恢复健康: ${result}`);
-        } catch (e) {
-            showToast('操作失败: ' + e.message, true);
-        }
-    }
-
-    async function cultivationBtn() {
-        try {
-            if (typeof cultivation !== 'function') {
-                showToast('接口未加载', true);
-                return;
-            }
-
-            const result = cultivation();
-            showToast(result);
-            refreshUserInfo();
-            addToLog(`修炼结果: ${result}`);
-        } catch (e) {
-            showToast('操作失败: ' + e.message, true);
-        }
-    }
-
-    async function getGoldBtn() {
-        try {
-            const result = getGold();
-            showToast(result);
-            refreshUserInfo();
-            addToLog(`做工结果: ${result}`);
-        } catch (e) {
-            showToast('操作失败: ' + e.message, true);
-        }
-    }
-
-    // 挑战相关函数
-    async function listChallengeBtn() {
-        try {
-            // 1. 先检查Wasm接口是否加载成功
-            if (typeof listChallenge !== 'function') {
-                showToast('挑战接口未加载，请稍后重试', true);
-                return;
-            }
-
-            // 2. 调用Wasm接口获取数据
-            const rawData = listChallenge();
-            let challengeData = null;
-
-            // 3. 解析JSON数据（处理可能的解析错误）
-            try {
-                challengeData = JSON.parse(rawData);
-                console.log('获取到的挑战数据:', challengeData); // 调试用，可删除
-            } catch (jsonErr) {
-                showToast('挑战数据解析失败', true);
-                console.error('JSON解析错误:', jsonErr, '原始数据:', rawData);
-                return;
-            }
-
-            // 4. 提取核心的list数组（关键修复：适配{list: Array}格式）
-            let challengeList = [];
-            // 先判断是否是对象，且包含list属性，且list是数组
-            if (typeof challengeData === 'object' && challengeData !== null && Array.isArray(challengeData.list)) {
-                challengeList = challengeData.list; // 从对象中提取真正的数组
-            } else {
-                showToast('挑战数据格式异常', true);
-                console.warn('预期数据格式是{list: Array}，实际是:', challengeData);
-                return;
-            }
-
-            // 5. 渲染挑战列表
-            const challengeListElement = document.getElementById('challengeList');
-            if (challengeList.length === 0) {
-                challengeListElement.innerHTML = `
-                <div class="text-center text-dark-400 py-8">
-                    <i class="fa fa-frown-o text-xl mb-2"></i>
-                    <p>暂无可用挑战</p>
-                </div>
-            `;
-                return;
-            }
-
-            // 6. 循环生成挑战项（给每个属性加默认值，避免缺失属性报错）
-            let html = '';
-            challengeList.forEach((challenge, index) => {
-                const id = challenge.id || `${index}`; // 用索引当默认ID，避免空值
-                const name = challenge.title || `未知挑战-${index + 1}`;
-                const reward = challenge.reward || '无奖励';
-                const description = challenge.description || '暂无挑战描述';
-
-                html += `
-                <div class="border border-dark-300 rounded-lg p-4 hover:border-primary/50 transition-colors">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-bold">${name}</h3>
-                            <p class="text-dark-400 text-sm">奖励: ${reward}</p>
-                        </div>
-                        <button onclick="joinChallengeBtn(${id})"
-                            class=" text-accent px-3 py-1 rounded hover:bg-accent/30 transition-colors text-sm">
-                            接受挑战
-                        </button>
-                    </div>
-                    <p class="mt-2 text-dark-400 text-sm whitespace-pre-line">${description}</p>
-                </div>
-            `;
-            });
-
-            challengeListElement.innerHTML = html;
-            showToast(`已加载 ${challengeList.length} 个挑战`);
-        } catch (e) {
-            showToast('获取挑战列表失败: ' + e.message, true);
-            console.error('挑战列表加载异常:', e);
-        }
-    }
-
-    async function joinChallengeBtn(challengeId) {
-        try {
-            if (typeof joinChallenge !== 'function') {
-                showToast('接口未加载', true);
-                return;
-            }
-
-            const result = joinChallenge(challengeId);
-            console.log('加入挑战结果:', result);
-            refreshUserInfo();
-
-            if (result.log) {
-                addToLog(result.log);
-                addToLog(result.msg)
-            }
-            showToast(result.msg);
-        } catch (e) {
-            showToast('加入挑战失败: ' + e.message, true);
-        }
-    }
-
-    // 辅助函数
-    function getDifficultyLabel(difficulty) {
-        switch(difficulty) {
-            case 1: return '<span class="text-green-400 bg-green-900/30 px-2 py-0.5 rounded-full text-xs">简单</span>';
-            case 2: return '<span class="text-yellow-400 bg-yellow-900/30 px-2 py-0.5 rounded-full text-xs">中等</span>';
-            case 3: return '<span class="text-orange-400 bg-orange-900/30 px-2 py-0.5 rounded-full text-xs">困难</span>';
-            case 4: return '<span class="text-red-400 bg-red-900/30 px-2 py-0.5 rounded-full text-xs">史诗</span>';
-            default: return '<span class="text-gray-400 bg-gray-800/30 px-2 py-0.5 rounded-full text-xs">未知</span>';
-        }
     }
 
     function addToLog(message) {

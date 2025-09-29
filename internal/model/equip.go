@@ -19,12 +19,12 @@ type Equip struct {
 }
 
 const (
-	EquipTypeHead   = iota // 头甲
-	EquipTypeBody          // 胸甲
-	EquipTypeArm           // 臂甲
-	EquipTypeLeg           // 腿甲
-	EquipTypeWeapon        // 武器
-	EquipType              // 配饰
+	EquipTypeHead      = iota // 头甲
+	EquipTypeBody             // 胸甲
+	EquipTypeArm              // 臂甲
+	EquipTypeLeg              // 腿甲
+	EquipTypeWeapon           // 武器
+	EquipTypeAccessory        // 配饰
 	EquipTypeMax
 )
 
@@ -33,7 +33,17 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-// RandomEquip 随机生成装备
+// RandomEquip 根据指定的等级范围和类型生成随机装备。
+// 它根据给定的参数创建一个具有随机属性的装备，
+// 包括名称、属性值和特殊效果。
+//
+// 参数:
+//   - minLevel: 要生成的装备的最小等级
+//   - maxLevel: 要生成的装备的最大等级
+//   - equipType: 装备类型，-1 表示随机选择
+//
+// 返回值:
+//   - *Equip: 指向新生成的装备结构体的指针
 func RandomEquip(minLevel, maxLevel int64, equipType int) *Equip {
 	level := rand.Int63n(maxLevel-minLevel+1) + minLevel
 
@@ -50,10 +60,10 @@ func RandomEquip(minLevel, maxLevel int64, equipType int) *Equip {
 	name := generateEquipmentName(nameParts, level)
 
 	// 根据等级和基础属性计算最终属性
-	attack := int64(float64(baseAttrs.attack) * (1.0 + float64(level)*0.5))
-	defense := int64(float64(baseAttrs.defense) * (1.0 + float64(level)*0.5))
-	speed := int64(float64(baseAttrs.speed) * (1.0 + float64(level)*0.5))
-	hp := int64(float64(baseAttrs.hp) * (1.0 + float64(level)*0.5))
+	attack := int64(float64(baseAttrs.attack) * (1.0 + float64(level)))
+	defense := int64(float64(baseAttrs.defense) * (1.0 + float64(level)))
+	speed := int64(float64(baseAttrs.speed) * (1.0 + float64(level)))
+	hp := int64(float64(baseAttrs.hp) * (1.0 + float64(level)))
 
 	// 随机生成特效
 	specials := generateSpecials(equipType, level)
@@ -96,7 +106,7 @@ func getBaseAttributes(equipType int) baseAttributes {
 		return baseAttributes{0, 1, 1, 0}
 	case EquipTypeWeapon:
 		return baseAttributes{2, 0, 0, 0}
-	case EquipType: // 配饰
+	case EquipTypeAccessory: // 配饰
 		return baseAttributes{0, 0, 1, 5}
 	default:
 		return baseAttributes{0, 0, 0, 0}
@@ -140,13 +150,13 @@ func getEquipmentNameParts(equipType int) NameParts {
 	case int(EquipTypeWeapon):
 		return NameParts{
 			prefixes: []string{"破旧的", "普通的", "精致的", "史诗的", "传奇的"},
-			middles:  []string{"布", "皮", "铁", "钢", "银", "金", "龙鳞"},
+			middles:  []string{"木", "石", "铁", "钢", "银", "金", "龙鳞"},
 			suffixes: []string{"剑", "斧", "矛", "弓", "杖", "匕首", "锤"},
 		}
-	case int(EquipType): // 配饰
+	case int(EquipTypeAccessory): // 配饰
 		return NameParts{
 			prefixes: []string{"破旧的", "普通的", "精致的", "史诗的", "传奇的"},
-			middles:  []string{"布", "皮", "铁", "钢", "银", "金", "龙鳞"},
+			middles:  []string{"荧光", "星光", "辉光", "耀光", "银", "金", "龙鳞"},
 			suffixes: []string{"项链", "戒指", "手镯", "徽章", "护身符"},
 		}
 	default:
@@ -189,53 +199,94 @@ func generateEquipmentName(parts NameParts, level int64) string {
 }
 
 const (
-	SpecialsCritical = "暴击"
-	SpecialsSolid    = "坚固"
+	SpecialsCritical        = "暴击"
+	SpecialsSuperCritical   = "超级暴击"
+	SpecialsSpeedUp         = "轻盈"
+	SpecialsSuperSpeedUp    = "超级轻盈"
+	SpecialsSharp           = "尖锐"
+	SpecialsSuperSharp      = "超级尖锐"
+	SpecialsSolid           = "坚固"
+	SpecialsSuperSolid      = "超级坚固"
+	SpecialsStrong          = "强壮"
+	SpecialsSuperStrong     = "超级强壮"
+	SpecialsFast            = "迅捷"
+	SpecialsSuperFast       = "超级迅捷"
+	SpecialsSuckBlood       = "生命偷取"
+	SpecialsSuperSuckBlood  = "超级生命偷取"
+	SpecialsSecondKill      = "秒杀"
+	SpecialsSuperSecondKill = "超级秒杀"
+
+	// -------- 负面类 ------------
+
+	SpecialsGreedy       = "贪婪诅咒"
+	SpecialsWeak         = "脆弱诅咒"
+	SpecialsSlow         = "迟缓诅咒"
+	SpecialsAggressive   = "傲慢诅咒"
+	SpecialsDisappear    = "消失诅咒"
+	SpecialsAchillesHeel = "要害诅咒"
+	SpecialsBleed        = "流血诅咒"
 )
+
+var SpecialsDescription = map[string]string{
+	SpecialsCritical:        "暴击率提升 10%",
+	SpecialsSuperCritical:   "暴击率提升 20%",
+	SpecialsSpeedUp:         "闪避几率增加 10%",
+	SpecialsSuperSpeedUp:    "闪避几率增加 20%",
+	SpecialsSharp:           "攻击后额外造成 5 点伤害",
+	SpecialsSuperSharp:      "攻击后额外造成 10 点伤害",
+	SpecialsSolid:           "单次伤害结算时减少 5 点受到的伤害",
+	SpecialsSuperSolid:      "单次伤害结算时减少 10 点受到的伤害",
+	SpecialsStrong:          "单次伤害结算后恢复 3 点血量",
+	SpecialsSuperStrong:     "单次伤害结算后恢复 6 点血量",
+	SpecialsFast:            "有 25% 的几率提前出手",
+	SpecialsSuperFast:       "有 50% 的几率提前出手",
+	SpecialsSuckBlood:       "单次伤害结算后偷取造成伤害的 10%",
+	SpecialsSuperSuckBlood:  "单次伤害结算后偷取造成伤害的 20%",
+	SpecialsSecondKill:      "单次伤害结算后有 2.5% 几率目标立刻死亡",
+	SpecialsSuperSecondKill: "单次伤害结算后有 5% 几率目标立刻死亡",
+
+	// -------- 负面类 ------------
+
+	SpecialsGreedy:       "获取金币时减少收益的 20%",
+	SpecialsWeak:         "被暴击的几率提高 20%",
+	SpecialsSlow:         "有 30% 的几率最后出手",
+	SpecialsAggressive:   "单次受击伤害结算时增加 5 点受到的伤害",
+	SpecialsDisappear:    "有 50% 几率受击或攻击时无视该装备",
+	SpecialsAchillesHeel: "单次受击存在 3% 即死几率",
+	SpecialsBleed:        "战斗结束后扣取生命的 5%",
+}
 
 // 可能的特效列表
 var possibleSpecials = map[int][]string{
 	int(EquipTypeHead): {
-		"增加5%暴击率",
-		"免疫眩晕",
-		"提高10%魔法抗性",
-		"增加视野范围",
-		"减少受到的远程伤害",
+		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong,
+
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeBody): {
-		"增加10%最大生命值",
-		"每秒钟恢复1%生命值",
-		"减少10%受到的伤害",
-		"增加背包容量",
-		"提高所有属性2%",
+		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong,
+
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeArm): {
-		"增加10%攻击速度",
-		"提高5%命中率",
-		"减少技能冷却时间",
-		"增加10%暴击伤害",
-		"有几率造成额外伤害",
+		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsSuckBlood, SpecialsSuperSuckBlood,
+
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeLeg): {
-		"增加15%移动速度",
-		"减少受到的移动限制效果",
-		"提高闪避率",
-		"增加跳跃高度",
-		"免疫减速",
+		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsFast, SpecialsSuperFast,
+
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeWeapon): {
-		"增加10%攻击力",
-		"有几率造成双倍伤害",
-		"攻击时吸取生命值",
-		"对特定类型敌人造成额外伤害",
-		"攻击时有几率击晕敌人",
+		SpecialsCritical, SpecialsSuperCritical, SpecialsSharp, SpecialsSuperSharp, SpecialsSuckBlood, SpecialsSuperSuckBlood, SpecialsSecondKill, SpecialsSuperSecondKill,
+
+		SpecialsGreedy, SpecialsSlow, SpecialsDisappear, SpecialsBleed,
 	},
-	int(EquipType): { // 配饰
-		"增加所有属性5%",
-		"提高经验获取率",
-		"增加金币掉落率",
-		"提高元素抗性",
-		"死后有几率复活一次",
+	int(EquipTypeAccessory): { // 配饰
+		SpecialsCritical, SpecialsSuperCritical, SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSharp, SpecialsSuperSharp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsFast, SpecialsSuperFast, SpecialsSuckBlood, SpecialsSuperSuckBlood, SpecialsSecondKill, SpecialsSuperSecondKill,
+
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
 	},
 }
 
@@ -289,14 +340,14 @@ func (e Equip) GenerateDescription() string {
 		typeName = "腿甲"
 	case EquipTypeWeapon:
 		typeName = "武器"
-	case EquipType:
+	case EquipTypeAccessory:
 		typeName = "配饰"
 	default:
 		typeName = "装备"
 	}
 
 	var desc string
-	desc = fmt.Sprintf("一件%d级的%s，", e.Level, typeName)
+	desc = fmt.Sprintf("一件%s，", typeName)
 
 	if len(e.Special) > 0 {
 		desc += "拥有特殊效果："
@@ -304,7 +355,7 @@ func (e Equip) GenerateDescription() string {
 			if i > 0 {
 				desc += "，"
 			}
-			desc += s
+			desc += fmt.Sprintf("(%s) %s", s, SpecialsDescription[s])
 		}
 	} else {
 		desc += "没有特殊效果。"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/model"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils"
+	"time"
 )
 
 type BagService struct {
@@ -69,14 +70,11 @@ func cleanBagCountZeroItem(bag *model.Bag) *model.Bag {
 //
 //		参数:
 //	  itemAdd: 要添加的物品指针
-func addBagItem(itemAdd *model.Item) {
+func addBagItem(bag *model.Bag, itemAdd *model.Item) *model.Bag {
 	// 检查物品UUID是否有效，无效则直接返回
 	if itemAdd.UUid == 0 { // 未知物品
-		return
+		return bag
 	}
-
-	// 获取当前本地背包数据
-	bag := getLocalBag()
 
 	// 遍历背包中的物品，查找是否已存在相同UUID的物品
 	for i, item := range bag.Items {
@@ -84,13 +82,14 @@ func addBagItem(itemAdd *model.Item) {
 		if item.UUid == itemAdd.UUid {
 			bag.Items[i].Count += itemAdd.Count
 			updateLocalBag(bag)
-			return
+			return bag
 		}
 	}
 
 	// 如果没有找到相同UUID的物品，则将新物品添加到背包中
 	bag.Items = append(bag.Items, itemAdd)
 	updateLocalBag(bag)
+	return bag
 }
 
 func (s *BagService) GetBag() string {
@@ -126,8 +125,12 @@ func (s *BagService) UseBagItem(id int64) string {
 					bag.Items[ind].Count -= 1
 					bag = cleanBagCountZeroItem(bag)
 				}
+			} else if item.Type == model.ItemTypeEquip { // 装备
+				userLog := equipItem(item.UUid, bag)
+				msg += userLog
 			} else if item.Type == model.ItemTypeMaterial { // 材料
-
+				useLog, _ := s.userMaterialItem(item.UUid, bag)
+				msg += useLog
 			}
 			break
 		}
@@ -324,7 +327,17 @@ func (s *BagService) userMaterialItem(uuid int64, bag *model.Bag) (string, bool)
 		bag = s.reduceItem(bag, 14)
 		bag = s.reduceItem(bag, 15)
 		// 合成装备
-		//equip := model.RandomEquip()
+		equip := model.RandomEquip(0, 3, -1)
+		bag = addBagItem(bag, &model.Item{
+			UUid:        time.Now().Unix(),
+			Name:        equip.Name,
+			Description: equip.GenerateDescription(),
+			Count:       1,
+			Type:        1,
+			EquipInfo:   equip,
+		})
+		msg += fmt.Sprintf("法器打造成功: %s", equip.GenerateDescription())
+		updateLocalBag(bag)
 
 	} else {
 		msg += " 这是仍未被发现的材料... 你还不知道怎么使用它"
