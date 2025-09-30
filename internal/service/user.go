@@ -133,8 +133,10 @@ func (s *UserService) Heal() string {
 	CacheRedis.Store(key, struct{}{})
 	defer CacheRedis.Delete(key)
 
+	equipAttr := getUserEquipAttributes()
+
 	user := getLocalUser()
-	if user.Hp >= user.HpLimit {
+	if user.Hp >= user.HpLimit+equipAttr.Hp {
 		return "当前已经很健康了"
 	}
 
@@ -149,9 +151,9 @@ func (s *UserService) Heal() string {
 	user.NextCultivationTime = endTime
 
 	// 恢复血量上限的30%，但不超过血量上限
-	user.Hp = user.Hp + (user.HpLimit/10)*3
-	if user.Hp > user.HpLimit {
-		user.Hp = user.HpLimit
+	user.Hp = user.Hp + ((user.HpLimit+equipAttr.Hp)/10)*3
+	if user.Hp > user.HpLimit+equipAttr.Hp {
+		user.Hp = user.HpLimit + equipAttr.Hp
 	}
 	updateUserInfo(user)
 
@@ -168,6 +170,7 @@ func (s *UserService) Cultivation() string {
 
 	msg := ""
 	user := getLocalUser()
+	equipAttr := getUserEquipAttributes()
 
 	endTime := user.NextCultivationTime
 	// 需要检查一下时间能不能修炼
@@ -191,7 +194,7 @@ func (s *UserService) Cultivation() string {
 		user.Level = user.Level + 1
 		user.Potential = user.Potential + 3
 		user.HpLimit = user.HpLimit + 5
-		user.Hp = user.HpLimit
+		user.Hp = user.HpLimit + equipAttr.Hp
 		msg += "你感觉浑身充满了力量，获得了 3 点潜能，境界提升了..."
 		if user.RestartCount > 0 {
 			user.Potential = user.Potential + user.RestartCount

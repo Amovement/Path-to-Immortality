@@ -12,6 +12,7 @@ type Core struct {
 	UserService      *service.UserService
 	GoodsService     *service.GoodsService
 	BagService       *service.BagService
+	EquipService     *service.EquipService
 }
 
 func NewCore() *Core {
@@ -21,7 +22,18 @@ func NewCore() *Core {
 		UserService:      service.NewUserService(),
 		GoodsService:     service.NewGoodsService(),
 		BagService:       service.NewBagService(),
+		EquipService:     service.NewEquipService(),
 	}
+}
+
+// ------------ 装备类 ---------------------
+func (c *Core) TakeOffEquip(this js.Value, args []js.Value) interface{} {
+	uuid := args[0].Int()
+	return c.EquipService.TakeOffEquip(uuid)
+}
+
+func (c *Core) GetUserEquipAttributes(this js.Value, args []js.Value) interface{} {
+	return c.EquipService.GetUserEquipAttributes()
 }
 
 // ------------ 商品类 ---------------------

@@ -1,6 +1,9 @@
 package repo
 
-import "github.com/Amovement/Path-to-Immortality-WASM/internal/model"
+import (
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/model"
+	"sort"
+)
 
 var monsters = []model.Monster{
 	// （1-30级）
@@ -201,19 +204,22 @@ var challengeMonsters = []model.ChallengeMonster{
 
 // Goods 商品
 var Goods = []model.Goods{
-	{UUid: 1, Name: "下品淬体丹", Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险,长期服用存在耐药性"},
-	{UUid: 2, Name: "下品莽牛血", Price: 50, Description: "增加一点攻击，存在灵力反噬风险,长期服用存在耐药性"},
-	{UUid: 3, Name: "下品玄龟甲", Price: 50, Description: "增加一点防御，存在灵力反噬风险,长期服用存在耐药性"},
-	{UUid: 4, Name: "下品灵蛇皮", Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
-	{UUid: 5, Name: "逍遥散", Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
-	{UUid: 6, Name: "修为丹", Price: 20, Description: "增加十点经验"},
-	{UUid: 7, Name: "愈伤丹", Price: 20, Description: "瞬间恢复十五点生命值"},
-	{UUid: 8, Name: "金币罐子", Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
-	{UUid: 9, Name: "上品淬体丹", Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{UUid: 10, Name: "上品莽牛血", Price: 5000, Description: "增加两点攻击，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{UUid: 11, Name: "上品玄龟甲", Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{UUid: 12, Name: "上品灵蛇皮", Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
-	{UUid: 13, Name: "混沌清浊气", Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
+	{UUid: 1, Name: "下品淬体丹", Type: model.ItemTypeConsume, Price: 50, Description: "增加五点体魄上限，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 2, Name: "下品莽牛血", Type: model.ItemTypeConsume, Price: 50, Description: "增加一点攻击，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 3, Name: "下品玄龟甲", Type: model.ItemTypeConsume, Price: 50, Description: "增加一点防御，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 4, Name: "下品灵蛇皮", Type: model.ItemTypeConsume, Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
+	{UUid: 5, Name: "逍遥散", Type: model.ItemTypeConsume, Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
+	{UUid: 6, Name: "修为丹", Type: model.ItemTypeConsume, Price: 20, Description: "增加十点经验"},
+	{UUid: 7, Name: "愈伤丹", Type: model.ItemTypeConsume, Price: 20, Description: "瞬间恢复十五点生命值"},
+	{UUid: 8, Name: "金币罐子", Type: model.ItemTypeConsume, Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
+	{UUid: 9, Name: "上品淬体丹", Type: model.ItemTypeConsume, Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 10, Name: "上品莽牛血", Type: model.ItemTypeConsume, Price: 5000, Description: "增加两点攻击，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 11, Name: "上品玄龟甲", Type: model.ItemTypeConsume, Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 12, Name: "上品灵蛇皮", Type: model.ItemTypeConsume, Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
+	{UUid: 13, Name: "混沌清浊气", Type: model.ItemTypeConsume, Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
+
+	{UUid: 14, Name: "玄晶", Type: model.ItemTypeMaterial, Price: 2500, Description: "亮晶晶的矿物, 配合上`精魄`即可打造一柄随机的法器"},
+	{UUid: 15, Name: "精魄", Type: model.ItemTypeMaterial, Price: 5000, Description: "它似乎还活着, 配合上`玄晶`即可打造一柄随机的法器"},
 }
 
 var MonsterMap map[uint]model.Monster
@@ -240,5 +246,12 @@ func init() {
 	for _, v := range Goods {
 		GoodsMap[v.UUid] = v
 	}
+	// sort goods by price
+	sort.Slice(Goods, func(i, j int) bool {
+		if Goods[i].Price == Goods[j].Price {
+			return Goods[i].UUid > Goods[j].UUid
+		}
+		return Goods[i].Price < Goods[j].Price
+	})
 
 }
