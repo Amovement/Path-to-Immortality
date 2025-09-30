@@ -12,5 +12,6 @@ func main() {
 	register.RegisterVersionCallbacks(core)
 	register.RegisterGoodsCallbacks(core)
 	register.RegisterBagCallbacks(core)
+	register.RegisterEquipCallbacks(core)
 	<-make(chan struct{}) // 保持运行
 }

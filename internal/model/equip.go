@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"time"
 )
 
@@ -199,51 +200,55 @@ func generateEquipmentName(parts NameParts, level int64) string {
 }
 
 const (
-	SpecialsCritical        = "暴击"
-	SpecialsSuperCritical   = "超级暴击"
-	SpecialsSpeedUp         = "轻盈"
-	SpecialsSuperSpeedUp    = "超级轻盈"
-	SpecialsSharp           = "尖锐"
-	SpecialsSuperSharp      = "超级尖锐"
-	SpecialsSolid           = "坚固"
-	SpecialsSuperSolid      = "超级坚固"
-	SpecialsStrong          = "强壮"
-	SpecialsSuperStrong     = "超级强壮"
-	SpecialsFast            = "迅捷"
-	SpecialsSuperFast       = "超级迅捷"
-	SpecialsSuckBlood       = "生命偷取"
-	SpecialsSuperSuckBlood  = "超级生命偷取"
-	SpecialsSecondKill      = "秒杀"
-	SpecialsSuperSecondKill = "超级秒杀"
+	SpecialsCritical       = "暴击"     // "暴击率提升 10%",
+	SpecialsSuperCritical  = "超级暴击"   // "暴击率提升 20%",
+	SpecialsMastery        = "精通"     // "暴击伤害提高 25%",
+	SpecialsSuperMastery   = "超级精通"   // "暴击伤害提高 50%",
+	SpecialsSpeedUp        = "轻盈"     // "闪避几率增加 10%",
+	SpecialsSuperSpeedUp   = "超级轻盈"   // "闪避几率增加 20%",
+	SpecialsSharp          = "尖锐"     // "攻击后额外造成 5 点伤害",
+	SpecialsSuperSharp     = "超级尖锐"   // "攻击后额外造成 10 点伤害",
+	SpecialsSolid          = "坚固"     // "单次伤害结算时减少 5 点受到的伤害",
+	SpecialsSuperSolid     = "超级坚固"   // "单次伤害结算时减少 10 点受到的伤害",
+	SpecialsStrong         = "强壮"     // "单次伤害结算后恢复 3 点血量",
+	SpecialsSuperStrong    = "超级强壮"   // "单次伤害结算后恢复 6 点血量",
+	SpecialsFast           = "迅捷"     // "每次出手后提高自身速度 2.5%",
+	SpecialsSuperFast      = "超级迅捷"   // "每次出手后提高自身速度 5%",
+	SpecialsSuckBlood      = "生命偷取"   // "单次伤害结算后偷取造成伤害的 10%",
+	SpecialsSuperSuckBlood = "超级生命偷取" // "单次伤害结算后偷取造成伤害的 20%",
+	//SpecialsSecondKill      = "秒杀"     // "单次伤害结算后有 2.5% 几率目标立刻死亡",
+	//SpecialsSuperSecondKill = "超级秒杀"   // "单次伤害结算后有 5% 几率目标立刻死亡",
 
 	// -------- 负面类 ------------
 
-	SpecialsGreedy       = "贪婪诅咒"
-	SpecialsWeak         = "脆弱诅咒"
-	SpecialsSlow         = "迟缓诅咒"
-	SpecialsAggressive   = "傲慢诅咒"
-	SpecialsDisappear    = "消失诅咒"
-	SpecialsAchillesHeel = "要害诅咒"
-	SpecialsBleed        = "流血诅咒"
+	SpecialsGreedy       = "贪婪诅咒" // "获取金币时减少收益的 20%",
+	SpecialsWeak         = "脆弱诅咒" // "被暴击的几率提高 20%",
+	SpecialsSlow         = "迟缓诅咒" // "有 30% 的几率最后出手",
+	SpecialsAggressive   = "傲慢诅咒" // "单次受击伤害结算时增加 5 点受到的伤害",
+	SpecialsAchillesHeel = "要害诅咒" // "单次受击存在 3% 即死几率",
+	SpecialsBleed        = "流血诅咒" // "战斗结束后扣取生命的 5%",
+	SpecialsNoob         = "愚笨诅咒" // 失去闪避能力
 )
 
 var SpecialsDescription = map[string]string{
-	SpecialsCritical:        "暴击率提升 10%",
-	SpecialsSuperCritical:   "暴击率提升 20%",
-	SpecialsSpeedUp:         "闪避几率增加 10%",
-	SpecialsSuperSpeedUp:    "闪避几率增加 20%",
-	SpecialsSharp:           "攻击后额外造成 5 点伤害",
-	SpecialsSuperSharp:      "攻击后额外造成 10 点伤害",
-	SpecialsSolid:           "单次伤害结算时减少 5 点受到的伤害",
-	SpecialsSuperSolid:      "单次伤害结算时减少 10 点受到的伤害",
-	SpecialsStrong:          "单次伤害结算后恢复 3 点血量",
-	SpecialsSuperStrong:     "单次伤害结算后恢复 6 点血量",
-	SpecialsFast:            "有 25% 的几率提前出手",
-	SpecialsSuperFast:       "有 50% 的几率提前出手",
-	SpecialsSuckBlood:       "单次伤害结算后偷取造成伤害的 10%",
-	SpecialsSuperSuckBlood:  "单次伤害结算后偷取造成伤害的 20%",
-	SpecialsSecondKill:      "单次伤害结算后有 2.5% 几率目标立刻死亡",
-	SpecialsSuperSecondKill: "单次伤害结算后有 5% 几率目标立刻死亡",
+	SpecialsCritical:       "暴击率提升 10%",
+	SpecialsSuperCritical:  "暴击率提升 20%",
+	SpecialsMastery:        "暴击伤害提高 25%",
+	SpecialsSuperMastery:   "暴击伤害提高 50%",
+	SpecialsSpeedUp:        "闪避几率增加 10%",
+	SpecialsSuperSpeedUp:   "闪避几率增加 20%",
+	SpecialsSharp:          "攻击后额外造成 5 点伤害",
+	SpecialsSuperSharp:     "攻击后额外造成 10 点伤害",
+	SpecialsSolid:          "单次伤害结算时减少 5 点受到的伤害",
+	SpecialsSuperSolid:     "单次伤害结算时减少 10 点受到的伤害",
+	SpecialsStrong:         "单次伤害结算后恢复 3 点血量",
+	SpecialsSuperStrong:    "单次伤害结算后恢复 6 点血量",
+	SpecialsFast:           "每次出手后提高自身速度 2.5%",
+	SpecialsSuperFast:      "每次出手后提高自身速度 5%",
+	SpecialsSuckBlood:      "单次伤害结算后偷取造成伤害的 10%",
+	SpecialsSuperSuckBlood: "单次伤害结算后偷取造成伤害的 20%",
+	//SpecialsSecondKill:      "单次伤害结算后有 2.5% 几率目标立刻死亡",
+	//SpecialsSuperSecondKill: "单次伤害结算后有 5% 几率目标立刻死亡",
 
 	// -------- 负面类 ------------
 
@@ -251,42 +256,46 @@ var SpecialsDescription = map[string]string{
 	SpecialsWeak:         "被暴击的几率提高 20%",
 	SpecialsSlow:         "有 30% 的几率最后出手",
 	SpecialsAggressive:   "单次受击伤害结算时增加 5 点受到的伤害",
-	SpecialsDisappear:    "有 50% 几率受击或攻击时无视该装备",
 	SpecialsAchillesHeel: "单次受击存在 3% 即死几率",
 	SpecialsBleed:        "战斗结束后扣取生命的 5%",
+	SpecialsNoob:         "失去闪避能力",
+}
+
+func CheckHasEquipSpecial(specials []string, specialName string) bool {
+	return slices.Contains(specials, specialName)
 }
 
 // 可能的特效列表
 var possibleSpecials = map[int][]string{
 	int(EquipTypeHead): {
-		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong,
+		SpecialsMastery, SpecialsSuperMastery, SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong,
 
-		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsNoob, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeBody): {
 		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong,
 
-		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsNoob, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeArm): {
 		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsSuckBlood, SpecialsSuperSuckBlood,
 
-		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsNoob, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeLeg): {
 		SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsFast, SpecialsSuperFast,
 
-		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsNoob, SpecialsAchillesHeel, SpecialsBleed,
 	},
 	int(EquipTypeWeapon): {
-		SpecialsCritical, SpecialsSuperCritical, SpecialsSharp, SpecialsSuperSharp, SpecialsSuckBlood, SpecialsSuperSuckBlood, SpecialsSecondKill, SpecialsSuperSecondKill,
+		SpecialsMastery, SpecialsSuperMastery, SpecialsCritical, SpecialsSuperCritical, SpecialsSharp, SpecialsSuperSharp, SpecialsSuckBlood, SpecialsSuperSuckBlood,
 
-		SpecialsGreedy, SpecialsSlow, SpecialsDisappear, SpecialsBleed,
+		SpecialsGreedy, SpecialsSlow, SpecialsNoob, SpecialsBleed,
 	},
 	int(EquipTypeAccessory): { // 配饰
-		SpecialsCritical, SpecialsSuperCritical, SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSharp, SpecialsSuperSharp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsFast, SpecialsSuperFast, SpecialsSuckBlood, SpecialsSuperSuckBlood, SpecialsSecondKill, SpecialsSuperSecondKill,
+		SpecialsMastery, SpecialsSuperMastery, SpecialsCritical, SpecialsSuperCritical, SpecialsSpeedUp, SpecialsSuperSpeedUp, SpecialsSharp, SpecialsSuperSharp, SpecialsSolid, SpecialsSuperSolid, SpecialsStrong, SpecialsSuperStrong, SpecialsFast, SpecialsSuperFast, SpecialsSuckBlood, SpecialsSuperSuckBlood,
 
-		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsDisappear, SpecialsAchillesHeel, SpecialsBleed,
+		SpecialsGreedy, SpecialsWeak, SpecialsSlow, SpecialsAggressive, SpecialsNoob, SpecialsAchillesHeel, SpecialsBleed,
 	},
 }
 
@@ -347,7 +356,7 @@ func (e Equip) GenerateDescription() string {
 	}
 
 	var desc string
-	desc = fmt.Sprintf("一件%s，", typeName)
+	desc = fmt.Sprintf("%s，一件%s，", e.Name, typeName)
 
 	if len(e.Special) > 0 {
 		desc += "拥有特殊效果："

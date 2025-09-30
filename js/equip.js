@@ -105,9 +105,9 @@ function renderEquipItems(backpackData) {
                         ${equipDescription===''?'' : '</br>'+equipDescription}
                     </p>
                     
-                    ${status === 1 ? '<span class="text-primary text-sm px-1 py-0.5 rounded bg-primary/10">装备中</span>' : ''}
+                    ${status === 1 ? '<span class="text-green-600 text-sm px-1 py-0.5 rounded bg-green-100/30">装备中</span>' : ''}
                     <div class="mt-1 flex justify-end">
-                        <button onclick="useEquipItemBtn(${id})" class=" text-gray-100 px-0.5 py-0.5 rounded hover:bg-secondary text-sm transition-colors">
+                        <button onclick="useEquipItemBtn(${id},${status})" class="text-gray-100 px-0.5 py-0.5 rounded hover:bg-secondary text-sm transition-colors">
                             <i class="fa fa-plus-circle"></i> ${status === 1 ? '卸下' : '装备'}
                         </button>
                     </div>
@@ -120,10 +120,17 @@ function renderEquipItems(backpackData) {
     showToast(`背包中有 ${itemCnt} 个法器`);
 }
 
-function useEquipItemBtn(item) {
-    const result = useBagItem(item);
-    showToast(result);
-    addToLog(result);
+function useEquipItemBtn(item,status) {
+    if (status ===1){
+        const result = takeOffEquip(item);
+        showToast(result);
+        addToLog(result);
+    }else{
+        const result = useBagItem(item);
+        showToast(result);
+        addToLog(result);
+    }
+
     listEquip();
     refreshUserInfo();
 }

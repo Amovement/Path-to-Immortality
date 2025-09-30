@@ -232,8 +232,10 @@ const (
 //
 //	返回战斗结果和战斗日志
 func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster) (string, string) {
+	equipAttr := getUserEquipAttributes() // 获取装备
 	// 1. 初始化战斗状态（深拷贝避免修改原数据）
-	player := copyUserState(user)
+	player := copyUserState(user, &equipAttr)
+
 	monsterStates := copyMonsterStates(monsters)
 	rand.Seed(time.Now().UnixNano()) // 初始化随机种子（确保每次战斗结果不同）
 	logMsg := "玩家 " + player.Username + " 和 "
@@ -265,7 +267,15 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 				// 玩家出手：选择一个存活怪物攻击
 				targetMonster := getRandomAliveMonster(monsterStates)
 				if targetMonster != nil {
-					logMsg += playerAttack(player, targetMonster)
+					logMsg += playerAttack(player, equipAttr.Special, targetMonster)
+				}
+				if model.CheckHasEquipSpecial(equipAttr.Special, model.SpecialsFast) {
+					logMsg += "`迅捷`，使速度提升 " + fmt.Sprint(int64(float64(player.Speed)*0.025)) + " 点.\n"
+					player.Speed = player.Speed + int64(float64(player.Speed)*0.025)
+				}
+				if model.CheckHasEquipSpecial(equipAttr.Special, model.SpecialsSuperFast) {
+					logMsg += "`超级迅捷`，使速度提升 " + fmt.Sprint(int64(float64(player.Speed)*0.05)) + " 点.\n"
+					player.Speed = player.Speed + int64(float64(player.Speed)*0.05)
 				}
 			} else {
 				// 怪物出手：攻击玩家（若怪物已死亡则跳过）
@@ -273,7 +283,7 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 				if monster.Hp <= 0 {
 					continue
 				}
-				logMsg += monsterAttack(monster, player)
+				logMsg += monsterAttack(monster, player, equipAttr.Special)
 			}
 
 			// 攻击后立即检查战斗结束（避免后续单位无效出手）
@@ -294,14 +304,14 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 //--------------- 战斗辅助函数 ---------------
 
 // copyUserState 深拷贝玩家状态（避免战斗中修改原用户数据）
-func copyUserState(user *model.User) *model.User {
+func copyUserState(user *model.User, equipAttr *model.Equip) *model.User {
 	return &model.User{
 		Username: user.Username,
-		Attack:   user.Attack,
-		Defense:  user.Defense,
+		Attack:   user.Attack + equipAttr.Attack,
+		Defense:  user.Defense + equipAttr.Defense,
 		Hp:       user.Hp,
-		HpLimit:  user.HpLimit,
-		Speed:    user.Speed,
+		HpLimit:  user.HpLimit + equipAttr.Hp,
+		Speed:    user.Speed + equipAttr.Speed,
 		Level:    user.Level,
 	}
 }
@@ -396,12 +406,13 @@ func getRandomAliveMonster(monsters []*types.Monster) *types.Monster {
 // 参数:
 //
 //	player: 玩家对象，包含攻击属性
+//	specials: 所有装备的特效
 //	monster: 怪物对象，包含防御、血量等属性
 //
 // 返回值:
 //
 //	string: 攻击过程的日志信息
-func playerAttack(player *model.User, monster *types.Monster) string {
+func playerAttack(player *model.User, specials []string, monster *types.Monster) string {
 	var logMsg string
 	// 1. 计算基础伤害（玩家攻击 - 怪物防御，最低 1 点伤害）
 	baseDmg := player.Attack - monster.Defense
@@ -409,16 +420,52 @@ func playerAttack(player *model.User, monster *types.Monster) string {
 		baseDmg = 1
 	}
 
+	playerCritRate := critRate
+	if model.CheckHasEquipSpecial(specials, model.SpecialsCritical) {
+		playerCritRate += 0.1
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperCritical) {
+		playerCritRate += 0.2
+	}
+	playerCritMulti := critMulti
+	if model.CheckHasEquipSpecial(specials, model.SpecialsMastery) {
+		playerCritMulti += 0.25
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperMastery) {
+		playerCritMulti += 0.5
+	}
+
 	// 2. 判定是否触发暴击（修真 "神通暴击"）
 	var finalDmg int64
-	if rand.Float64() <= critRate {
-		finalDmg = int64(float64(baseDmg) * critMulti)
-		// 可在此处添加暴击日志：fmt.Printf ("玩家触发神通暴击！对【% s】造成 %.0f 点伤害 \n", monster.Name, critMulti)
-		logMsg += fmt.Sprintf("玩家触发神通暴击！对【%s】造成 %.0f 点伤害 \n", monster.Name, critMulti)
+	if rand.Float64() <= playerCritRate {
+		finalDmg = int64(float64(baseDmg) * playerCritMulti)
+		logMsg += fmt.Sprintf("玩家触发神通暴击！对【%s】造成 %d 点伤害", monster.Name, finalDmg)
 	} else {
 		finalDmg = baseDmg
-		// 可在此处添加普通攻击日志：fmt.Printf ("玩家对【% s】造成 % d 点伤害 \n", monster.Name, baseDmg)
-		logMsg += fmt.Sprintf("玩家对【%s】造成 % d 点伤害 \n", monster.Name, baseDmg)
+		logMsg += fmt.Sprintf("玩家对【%s】造成 %d 点伤害", monster.Name, baseDmg)
+	}
+	if player.Hp < player.HpLimit && model.CheckHasEquipSpecial(specials, model.SpecialsSuckBlood) {
+		player.Hp += (finalDmg / 10)
+		if player.Hp > player.HpLimit {
+			player.Hp = player.HpLimit
+		}
+		logMsg += fmt.Sprintf("触发`生命偷取`体魄恢复了 %d 点 ", finalDmg/10)
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSuckBlood) {
+		player.Hp += (finalDmg / 5)
+		if player.Hp > player.HpLimit {
+			player.Hp = player.HpLimit
+		}
+		logMsg += fmt.Sprintf("触发`超级生命偷取`体魄恢复了 %d 点 ", finalDmg/5)
+	}
+
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSharp) {
+		finalDmg += 5
+		logMsg += fmt.Sprintf("额外造成了`尖锐伤害` 5 点 ")
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSharp) {
+		finalDmg += 10
+		logMsg += fmt.Sprintf("额外造成了`超级尖锐伤害` 10 点 ")
 	}
 
 	// 3. 计算怪物剩余血量（最低 0 点）
@@ -426,8 +473,49 @@ func playerAttack(player *model.User, monster *types.Monster) string {
 	if monster.Hp < 0 {
 		monster.Hp = 0
 	}
-	// 可在此处添加伤害结果日志：fmt.Printf ("【% s】剩余血量：% d/% d\n", monster.Name, monster.Hp, monster.HpLimit)
-	logMsg += fmt.Sprintf("【%s】剩余血量：% d/% d\n", monster.Name, monster.Hp, monster.HpLimit)
+	logMsg += fmt.Sprintf(" 【%s】剩余血量：% d/%d\n", monster.Name, monster.Hp, monster.HpLimit)
+
+	if player.Speed > monster.Speed*2 { // 速度超出两倍会触发多次伤害
+		for i := 1; i <= int(player.Speed/(monster.Speed+1)); i++ {
+			finalDmg = baseDmg
+			if rand.Float64() <= playerCritRate {
+				finalDmg = int64(float64(baseDmg) * playerCritMulti)
+			}
+			logMsg += fmt.Sprintf("玩家触发追击对【%s】造成 %d 点伤害 ", monster.Name, finalDmg)
+			if player.Hp < player.HpLimit && model.CheckHasEquipSpecial(specials, model.SpecialsSuckBlood) {
+				player.Hp += (finalDmg / 10)
+				if player.Hp > player.HpLimit {
+					player.Hp = player.HpLimit
+				}
+				logMsg += fmt.Sprintf("触发`生命偷取`体魄恢复了 %d 点 ", finalDmg/10)
+			}
+			if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSuckBlood) {
+				player.Hp += (finalDmg / 5)
+				if player.Hp > player.HpLimit {
+					player.Hp = player.HpLimit
+				}
+				logMsg += fmt.Sprintf("触发`超级生命偷取`体魄恢复了 %d 点 ", finalDmg/5)
+			}
+			if model.CheckHasEquipSpecial(specials, model.SpecialsSharp) {
+				finalDmg += 5
+				logMsg += fmt.Sprintf("额外造成了`尖锐`伤害 5 点 ")
+			}
+			if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSharp) {
+				finalDmg += 10
+				logMsg += fmt.Sprintf("额外造成了`超级尖锐`伤害 10 点 ")
+			}
+			monster.Hp -= finalDmg
+			if monster.Hp < 0 {
+				monster.Hp = 0
+			}
+			logMsg += fmt.Sprintf("【%s】剩余血量：%d/%d\n", monster.Name, monster.Hp, monster.HpLimit)
+			if monster.Hp <= 0 {
+				logMsg += fmt.Sprintf("【%s】已死亡！\n", monster.Name)
+				break
+			}
+		}
+	}
+
 	return logMsg
 }
 
@@ -435,14 +523,26 @@ func playerAttack(player *model.User, monster *types.Monster) string {
 // 参数:
 //   - monster: 攻击玩家的怪物对象，包含攻击值等属性
 //   - player: 被攻击的玩家对象，包含防御值、当前血量等属性
+//   - specials: 所有装备的特效
 //
 // 返回值:
 //   - string: 战斗过程的日志信息，用于展示给用户
-func monsterAttack(monster *types.Monster, player *model.User) string {
+func monsterAttack(monster *types.Monster, player *model.User, specials []string) string {
 	var logMsg string
 
+	playerDodgeRate := dodgeRate
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSpeedUp) {
+		playerDodgeRate += 0.1
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSpeedUp) {
+		playerDodgeRate -= 0.2
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsNoob) {
+		playerDodgeRate = -1.0
+	}
+
 	// 判定是否触发闪避（修真 "身法闪避"）
-	if rand.Float64() <= dodgeRate {
+	if rand.Float64() <= playerDodgeRate {
 		logMsg += fmt.Sprintf("玩家触发身法闪避！躲开了【%s】的攻击 \n", monster.Name)
 		return logMsg
 	}
@@ -453,25 +553,83 @@ func monsterAttack(monster *types.Monster, player *model.User) string {
 		baseDmg = 1
 	}
 
-	// 判定是否触发怪物暴击（高阶怪物 "妖术暴击"，概率比玩家低 5%）
-	monsterCritRate := critRate - 0.05
+	// 判定是否触发怪物暴击
+	monsterCritRate := critRate
 	if monsterCritRate < 0 {
 		monsterCritRate = 0
 	}
 	var finalDmg int64
 	if rand.Float64() <= monsterCritRate {
 		finalDmg = int64(float64(baseDmg) * critMulti)
-		logMsg += fmt.Sprintf("【%s】触发妖术暴击！对玩家造成 %.0f 点伤害 \n", monster.Name, critMulti)
+		logMsg += fmt.Sprintf("【%s】触发妖术暴击！对玩家造成 %d 点伤害 ", monster.Name, finalDmg)
 	} else {
 		finalDmg = baseDmg
-		logMsg += fmt.Sprintf("【%s】对玩家造成 % d 点伤害 \n", monster.Name, baseDmg)
+		logMsg += fmt.Sprintf("【%s】对玩家造成 %d 点伤害 ", monster.Name, baseDmg)
+	}
+
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSolid) {
+		finalDmg -= 5
+		logMsg += fmt.Sprint("`坚固`抵挡了 5 点伤害 ")
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSolid) {
+		finalDmg -= 10
+		logMsg += fmt.Sprint("`超级坚固`抵挡了 10 点伤害 ")
+	}
+	if finalDmg <= 0 {
+		finalDmg = 1
 	}
 
 	// 计算玩家剩余血量（最低 0 点）
 	player.Hp -= finalDmg
+	if model.CheckHasEquipSpecial(specials, model.SpecialsStrong) {
+		player.Hp += 3
+		logMsg += fmt.Sprint("`强壮`恢复了 3 点血量 ")
+	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperStrong) {
+		player.Hp += 6
+		logMsg += fmt.Sprint("`超级强壮`恢复了 6 点血量 ")
+	}
 	if player.Hp < 0 {
 		player.Hp = 0
 	}
-	logMsg += fmt.Sprintf("玩家剩余血量：% d/% d\n", player.Hp, player.HpLimit)
+	logMsg += fmt.Sprintf("玩家剩余血量：%d/%d\n", player.Hp, player.HpLimit)
+
+	if monster.Speed > player.Speed*2 { // 速度超出两倍会触发多次伤害
+		for i := 1; i <= int(monster.Speed/(player.Speed+1)); i++ {
+			finalDmg = baseDmg
+			if rand.Float64() <= critRate {
+				finalDmg = int64(float64(baseDmg) * critMulti)
+			}
+			logMsg += fmt.Sprintf("【%s】触发追击对玩家造成 %d 点伤害 ", monster.Name, finalDmg)
+			if model.CheckHasEquipSpecial(specials, model.SpecialsSolid) {
+				finalDmg -= 5
+				logMsg += fmt.Sprint("`坚固`抵挡了 5 点伤害 ")
+			}
+			if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSolid) {
+				finalDmg -= 10
+				logMsg += fmt.Sprint("`超级坚固`抵挡了 10 点伤害 ")
+			}
+			if finalDmg <= 0 {
+				finalDmg = 1
+			}
+			player.Hp -= finalDmg
+			if model.CheckHasEquipSpecial(specials, model.SpecialsStrong) {
+				player.Hp += 3
+				logMsg += fmt.Sprint("`强壮`恢复了 3 点血量 ")
+			}
+			if model.CheckHasEquipSpecial(specials, model.SpecialsSuperStrong) {
+				player.Hp += 6
+				logMsg += fmt.Sprint("`超级强壮`恢复了 6 点血量 ")
+			}
+			if player.Hp < 0 {
+				player.Hp = 0
+			}
+			logMsg += fmt.Sprintf(" 玩家剩余血量：%d/%d\n", monster.Hp, monster.HpLimit)
+			if player.Hp <= 0 {
+				logMsg += fmt.Sprintf("玩家已死亡！\n")
+				break
+			}
+		}
+	}
 	return logMsg
 }

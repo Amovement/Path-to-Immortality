@@ -10,12 +10,25 @@ function refreshUserInfo() {
         const userInfoStr = getUserInfo();
         const userInfo = JSON.parse(userInfoStr);
 
+        const userEquipAttributesStr = getUserEquipAttributes();
+        const userEquipAttributes = JSON.parse(userEquipAttributesStr);
+
         document.getElementById('username').textContent = userInfo.username || '未设置';
         document.getElementById('cultivation').textContent = userInfo.cultivation ;
-        document.getElementById('hp').textContent = userInfo.hp + '/' + userInfo.hpLimit;
-        document.getElementById('attack').textContent = userInfo.attack || '0';
-        document.getElementById('defense').textContent = userInfo.defense || '0';
-        document.getElementById('speed').textContent = userInfo.speed || '0';
+
+        let hpStr = userInfo.hp + '/' + userInfo.hpLimit;
+        if(userEquipAttributes.Hp!==0){hpStr += '(+' + userEquipAttributes.Hp+')';}
+        document.getElementById('hp').textContent = hpStr;
+        let attackStr = userInfo.attack;
+        if(userEquipAttributes.Attack!==0){attackStr += '(+' + userEquipAttributes.Attack+')';}
+        document.getElementById('attack').textContent =attackStr;
+        let defenseStr = userInfo.defense;
+        if(userEquipAttributes.Defense!==0){defenseStr += '(+' + userEquipAttributes.Defense+')';}
+        document.getElementById('defense').textContent = defenseStr;
+        let speedStr = userInfo.speed;
+        if(userEquipAttributes.Speed!==0){speedStr += '(+' + userEquipAttributes.Speed+')';}
+        document.getElementById('speed').textContent = speedStr;
+
         document.getElementById('exp').textContent = userInfo.exp  + '/' + userInfo.level*10; // 转为数字
         document.getElementById('potential').textContent = userInfo.potential || '0';
         document.getElementById('gold').textContent = userInfo.gold || '0';

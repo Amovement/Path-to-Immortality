@@ -328,14 +328,18 @@ func (s *BagService) userMaterialItem(uuid int64, bag *model.Bag) (string, bool)
 		bag = s.reduceItem(bag, 15)
 		// 合成装备
 		equip := model.RandomEquip(0, 3, -1)
+		if bag.RandomUUid == 0 {
+			bag.RandomUUid = time.Now().Unix()
+		}
 		bag = addBagItem(bag, &model.Item{
-			UUid:        time.Now().Unix(),
+			UUid:        bag.RandomUUid,
 			Name:        equip.Name,
 			Description: equip.GenerateDescription(),
 			Count:       1,
 			Type:        1,
 			EquipInfo:   equip,
 		})
+		bag.RandomUUid = bag.RandomUUid + 1
 		msg += fmt.Sprintf("法器打造成功: %s", equip.GenerateDescription())
 		updateLocalBag(bag)
 
