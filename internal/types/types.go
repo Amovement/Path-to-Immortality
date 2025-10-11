@@ -33,8 +33,8 @@ type GetUserInfoResp struct {
 	Attack              int64  `json:"attack"`              // 攻击
 	Defense             int64  `json:"defense"`             // 防御
 	Speed               int64  `json:"speed"`               // 速度
-	Hp                  int64  `json:"hp"`                  // 生命
-	HpLimit             int64  `json:"hpLimit"`             // 最大生命
+	Hp                  int64  `json:"hp"`                  // 体魄
+	HpLimit             int64  `json:"hpLimit"`             // 最大体魄
 	Exp                 int64  `json:"exp"`                 // 经验
 	Cultivation         string `json:"cultivation"`         // 修为, 与等级挂钩
 	Level               int64  `json:"level"`               // 等级
@@ -93,7 +93,7 @@ type LoginResp struct {
 type Monster struct {
 	Name        string `json:"name"`
 	Hp          int64  `json:"hp"`
-	HpLimit     int64  `json:"hpLimit"` // 最大生命
+	HpLimit     int64  `json:"hpLimit"` // 最大体魄
 	Attack      int64  `json:"attack"`  // 攻击
 	Defense     int64  `json:"defense"` // 防御
 	Cultivation string `json:"level"`   // 修为, 与等级挂钩

@@ -199,6 +199,7 @@ func generateEquipmentName(parts NameParts, level int64) string {
 	return prefix + middle + suffix
 }
 
+// 特效
 const (
 	SpecialsCritical       = "暴击"     // "暴击率提升 10%",
 	SpecialsSuperCritical  = "超级暴击"   // "暴击率提升 20%",
@@ -212,10 +213,10 @@ const (
 	SpecialsSuperSolid     = "超级坚固"   // "单次伤害结算时减少 10 点受到的伤害",
 	SpecialsStrong         = "强壮"     // "单次伤害结算后恢复 3 点血量",
 	SpecialsSuperStrong    = "超级强壮"   // "单次伤害结算后恢复 6 点血量",
-	SpecialsFast           = "迅捷"     // "每次出手后提高自身速度 2.5%",
-	SpecialsSuperFast      = "超级迅捷"   // "每次出手后提高自身速度 5%",
-	SpecialsSuckBlood      = "生命偷取"   // "单次伤害结算后偷取造成伤害的 10%",
-	SpecialsSuperSuckBlood = "超级生命偷取" // "单次伤害结算后偷取造成伤害的 20%",
+	SpecialsFast           = "迅捷"     // "战斗中每次出手后提高自身速度 2.5%",
+	SpecialsSuperFast      = "超级迅捷"   // "战斗中每次出手后提高自身速度 5%",
+	SpecialsSuckBlood      = "体魄偷取"   // "单次伤害结算后偷取造成伤害的 10%",
+	SpecialsSuperSuckBlood = "超级体魄偷取" // "单次伤害结算后偷取造成伤害的 20%",
 	//SpecialsSecondKill      = "秒杀"     // "单次伤害结算后有 2.5% 几率目标立刻死亡",
 	//SpecialsSuperSecondKill = "超级秒杀"   // "单次伤害结算后有 5% 几率目标立刻死亡",
 
@@ -226,7 +227,7 @@ const (
 	SpecialsSlow         = "迟缓诅咒" // "有 30% 的几率最后出手",
 	SpecialsAggressive   = "傲慢诅咒" // "单次受击伤害结算时增加 5 点受到的伤害",
 	SpecialsAchillesHeel = "要害诅咒" // "单次受击存在 3% 即死几率",
-	SpecialsBleed        = "流血诅咒" // "战斗结束后扣取生命的 5%",
+	SpecialsBleed        = "流血诅咒" // "战斗结束后扣取体魄上限的 5%",
 	SpecialsNoob         = "愚笨诅咒" // 失去闪避能力
 )
 
@@ -243,8 +244,8 @@ var SpecialsDescription = map[string]string{
 	SpecialsSuperSolid:     "单次伤害结算时减少 10 点受到的伤害",
 	SpecialsStrong:         "单次伤害结算后恢复 3 点血量",
 	SpecialsSuperStrong:    "单次伤害结算后恢复 6 点血量",
-	SpecialsFast:           "每次出手后提高自身速度 2.5%",
-	SpecialsSuperFast:      "每次出手后提高自身速度 5%",
+	SpecialsFast:           "战斗中每次出手后提高自身速度 2.5%",
+	SpecialsSuperFast:      "战斗中每次出手后提高自身速度 5%",
 	SpecialsSuckBlood:      "单次伤害结算后偷取造成伤害的 10%",
 	SpecialsSuperSuckBlood: "单次伤害结算后偷取造成伤害的 20%",
 	//SpecialsSecondKill:      "单次伤害结算后有 2.5% 几率目标立刻死亡",
@@ -257,7 +258,7 @@ var SpecialsDescription = map[string]string{
 	SpecialsSlow:         "有 30% 的几率最后出手",
 	SpecialsAggressive:   "单次受击伤害结算时增加 5 点受到的伤害",
 	SpecialsAchillesHeel: "单次受击存在 3% 即死几率",
-	SpecialsBleed:        "战斗结束后扣取生命的 5%",
+	SpecialsBleed:        "战斗结束后扣取体魄上限的 5%",
 	SpecialsNoob:         "失去闪避能力",
 }
 
@@ -371,4 +372,19 @@ func (e Equip) GenerateDescription() string {
 	}
 
 	return desc
+}
+
+// UpgradeEquip 装备升级
+func (e Equip) UpgradeEquip() Equip {
+	e.Level = e.Level + 1
+	e.Description = e.GenerateDescription()
+
+	// 根据装备类型获取基础属性范围
+	baseAttrs := getBaseAttributes(int(e.Type))
+	e.Hp = e.Hp + int64(baseAttrs.hp)
+	e.Attack = e.Attack + int64(baseAttrs.attack)
+	e.Defense = e.Defense + int64(baseAttrs.defense)
+	e.Speed = e.Speed + int64(baseAttrs.speed)
+
+	return e
 }

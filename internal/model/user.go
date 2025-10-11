@@ -4,8 +4,8 @@ type User struct {
 	Username            string          `json:"username"`
 	Attack              int64           `json:"attack"`              // 攻击
 	Defense             int64           `json:"defense"`             // 防御
-	Hp                  int64           `json:"hp"`                  // 生命
-	HpLimit             int64           `json:"hpLimit"`             // 生命上限
+	Hp                  int64           `json:"hp"`                  // 体魄
+	HpLimit             int64           `json:"hpLimit"`             // 体魄上限
 	Speed               int64           `json:"speed"`               // 速度
 	Exp                 int64           `json:"exp"`                 // 经验
 	Level               int64           `json:"level"`               // 等级

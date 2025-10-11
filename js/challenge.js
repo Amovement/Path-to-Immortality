@@ -98,3 +98,12 @@ async function joinChallengeBtn(challengeId) {
         showToast('加入挑战失败: ' + e.message, true);
     }
 }
+
+// 清空日志函数
+function clearChallengeLog() {
+    const logElement = document.getElementById('challengeLog');
+    // 保留"暂无记录"的提示文本
+    logElement.innerHTML = '<p class="italic">暂无记录</p>';
+    showToast('日志已清空');
+    addToLog('日志已清空');
+}
