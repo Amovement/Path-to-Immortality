@@ -87,7 +87,7 @@ func (s *UserService) SetUsername(username string) {
 }
 
 // Allocate 为用户分配属性点
-// 参数 stat: 要分配的属性类型，可选值为 "attack"(攻击)、"defense"(防御)、"hpLimit"(生命上限)、"speed"(速度)
+// 参数 stat: 要分配的属性类型，可选值为 "attack"(攻击)、"defense"(防御)、"hpLimit"(体魄上限)、"speed"(速度)
 // 返回值: 操作结果字符串，成功返回"分配成功"，失败返回相应的错误提示
 func (s *UserService) Allocate(stat string) string {
 	key := fmt.Sprint("stat:lock") // 角色属性锁
@@ -287,6 +287,7 @@ func (s *UserService) Restart() string {
 	var msg string
 	user := getLocalUser()
 	newUser := model.NewUser()
+	bag := model.NewBag()
 	newUser.Username = user.Username
 	newUser.RestartCount = user.RestartCount
 
@@ -298,5 +299,6 @@ func (s *UserService) Restart() string {
 	}
 
 	updateUserInfo(newUser)
+	updateLocalBag(bag)
 	return msg
 }

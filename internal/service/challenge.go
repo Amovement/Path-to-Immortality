@@ -170,7 +170,21 @@ func (s *ChallengeService) JoinChallenge(ChallengeId int) (string, string) {
 
 	msg, fightLog := s.fightCore(user, challenge.MonsterList)
 	if msg == fightWin {
-		user.Gold = user.Gold + challengeCache.Gold
+		goldGet := challengeCache.Gold
+		equipAttr := getUserEquipAttributes()
+		if model.CheckHasEquipSpecial(equipAttr.Special, model.SpecialsGreedy) {
+			goldGet = (goldGet / 10) * 8
+		}
+		user.Gold = user.Gold + goldGet
+
+		if model.CheckHasEquipSpecial(equipAttr.Special, model.SpecialsBleed) {
+			user.Hp -= (user.HpLimit / 100) * 5
+			if user.Hp < 0 {
+				user.Hp = 1
+			}
+			msg = msg + " `流血诅咒`扣除了" + fmt.Sprint(user.HpLimit/100*5) + "点体魄. "
+		}
+
 		user = s.userPassChallenge(user, challenge.ID)
 		msg = msg + challenge.Title + "战斗胜利. 获得金币 " + fmt.Sprint(challengeCache.Gold) + " 枚."
 	} else if msg == fightLose {
@@ -259,7 +273,7 @@ func (s *ChallengeService) fightCore(user *model.User, monsters []types.Monster)
 		}
 
 		// 3. 计算当前回合所有战斗单位的出手顺序（按速度排序，速度相同则玩家优先）
-		actionOrder := getActionOrder(player, monsterStates)
+		actionOrder := getActionOrder(player, equipAttr.Special, monsterStates)
 
 		// 4. 执行当前回合所有单位的攻击动作
 		for _, unit := range actionOrder {
@@ -356,13 +370,8 @@ type actionUnit struct {
 }
 
 // getActionOrder 计算当前回合出手顺序：速度降序，速度相同则玩家优先
-func getActionOrder(player *model.User, monsters []*types.Monster) []actionUnit {
+func getActionOrder(player *model.User, specials []string, monsters []*types.Monster) []actionUnit {
 	var units []actionUnit
-	// 添加玩家到动作列表
-	units = append(units, actionUnit{
-		isPlayer: true,
-		speed:    player.Speed,
-	})
 	// 添加所有存活怪物到动作列表
 	for _, m := range monsters {
 		if m.Hp > 0 {
@@ -371,6 +380,17 @@ func getActionOrder(player *model.User, monsters []*types.Monster) []actionUnit 
 				speed:    m.Speed,
 				monster:  m,
 			})
+		}
+	}
+	// 添加玩家到动作列表
+	units = append(units, actionUnit{
+		isPlayer: true,
+		speed:    player.Speed,
+	})
+
+	if model.CheckHasEquipSpecial(specials, model.SpecialsSlow) {
+		if rand.Float64() <= 0.3 {
+			return units
 		}
 	}
 
@@ -449,14 +469,14 @@ func playerAttack(player *model.User, specials []string, monster *types.Monster)
 		if player.Hp > player.HpLimit {
 			player.Hp = player.HpLimit
 		}
-		logMsg += fmt.Sprintf("触发`生命偷取`体魄恢复了 %d 点 ", finalDmg/10)
+		logMsg += fmt.Sprintf("触发`体魄偷取`体魄恢复了 %d 点 ", finalDmg/10)
 	}
 	if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSuckBlood) {
 		player.Hp += (finalDmg / 5)
 		if player.Hp > player.HpLimit {
 			player.Hp = player.HpLimit
 		}
-		logMsg += fmt.Sprintf("触发`超级生命偷取`体魄恢复了 %d 点 ", finalDmg/5)
+		logMsg += fmt.Sprintf("触发`超级体魄偷取`体魄恢复了 %d 点 ", finalDmg/5)
 	}
 
 	if model.CheckHasEquipSpecial(specials, model.SpecialsSharp) {
@@ -487,14 +507,14 @@ func playerAttack(player *model.User, specials []string, monster *types.Monster)
 				if player.Hp > player.HpLimit {
 					player.Hp = player.HpLimit
 				}
-				logMsg += fmt.Sprintf("触发`生命偷取`体魄恢复了 %d 点 ", finalDmg/10)
+				logMsg += fmt.Sprintf("触发`体魄偷取`体魄恢复了 %d 点 ", finalDmg/10)
 			}
 			if model.CheckHasEquipSpecial(specials, model.SpecialsSuperSuckBlood) {
 				player.Hp += (finalDmg / 5)
 				if player.Hp > player.HpLimit {
 					player.Hp = player.HpLimit
 				}
-				logMsg += fmt.Sprintf("触发`超级生命偷取`体魄恢复了 %d 点 ", finalDmg/5)
+				logMsg += fmt.Sprintf("触发`超级体魄偷取`体魄恢复了 %d 点 ", finalDmg/5)
 			}
 			if model.CheckHasEquipSpecial(specials, model.SpecialsSharp) {
 				finalDmg += 5
@@ -555,6 +575,9 @@ func monsterAttack(monster *types.Monster, player *model.User, specials []string
 
 	// 判定是否触发怪物暴击
 	monsterCritRate := critRate
+	if model.CheckHasEquipSpecial(specials, model.SpecialsWeak) {
+		monsterCritRate += 0.2
+	}
 	if monsterCritRate < 0 {
 		monsterCritRate = 0
 	}
@@ -578,6 +601,10 @@ func monsterAttack(monster *types.Monster, player *model.User, specials []string
 	if finalDmg <= 0 {
 		finalDmg = 1
 	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsAggressive) {
+		finalDmg += 5
+		logMsg += fmt.Sprint("`傲慢诅咒`增加了 5 点收到的伤害 ")
+	}
 
 	// 计算玩家剩余血量（最低 0 点）
 	player.Hp -= finalDmg
@@ -589,6 +616,12 @@ func monsterAttack(monster *types.Monster, player *model.User, specials []string
 		player.Hp += 6
 		logMsg += fmt.Sprint("`超级强壮`恢复了 6 点血量 ")
 	}
+	if model.CheckHasEquipSpecial(specials, model.SpecialsAchillesHeel) {
+		if rand.Float64() <= 0.03 {
+			player.Hp = -1
+			logMsg += fmt.Sprint("你感觉膝盖中了一箭 `要害诅咒`触发了!!!! 体魄清零了! ")
+		}
+	}
 	if player.Hp < 0 {
 		player.Hp = 0
 	}
@@ -597,7 +630,7 @@ func monsterAttack(monster *types.Monster, player *model.User, specials []string
 	if monster.Speed > player.Speed*2 { // 速度超出两倍会触发多次伤害
 		for i := 1; i <= int(monster.Speed/(player.Speed+1)); i++ {
 			finalDmg = baseDmg
-			if rand.Float64() <= critRate {
+			if rand.Float64() <= monsterCritRate {
 				finalDmg = int64(float64(baseDmg) * critMulti)
 			}
 			logMsg += fmt.Sprintf("【%s】触发追击对玩家造成 %d 点伤害 ", monster.Name, finalDmg)
@@ -611,6 +644,10 @@ func monsterAttack(monster *types.Monster, player *model.User, specials []string
 			}
 			if finalDmg <= 0 {
 				finalDmg = 1
+			}
+			if model.CheckHasEquipSpecial(specials, model.SpecialsAggressive) {
+				finalDmg += 5
+				logMsg += fmt.Sprint("`傲慢诅咒`增加了 5 点收到的伤害 ")
 			}
 			player.Hp -= finalDmg
 			if model.CheckHasEquipSpecial(specials, model.SpecialsStrong) {

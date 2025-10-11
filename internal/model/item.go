@@ -12,7 +12,13 @@ type Item struct {
 }
 
 const (
-	ItemTypeConsume  = 0 // 消耗品
-	ItemTypeEquip    = 1 // 装备
-	ItemTypeMaterial = 2 //材料
+	ItemTypeConsume  = iota // 消耗品
+	ItemTypeEquip           // 装备
+	ItemTypeMaterial        //材料
+
+)
+
+const (
+	ItemStatusNormal = iota
+	ItemStatusEquip
 )

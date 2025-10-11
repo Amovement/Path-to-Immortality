@@ -37,4 +37,6 @@ func RegisterBagCallbacks(core *internal.Core) {
 func RegisterEquipCallbacks(core *internal.Core) {
 	js.Global().Set("takeOffEquip", js.FuncOf(core.TakeOffEquip))
 	js.Global().Set("getUserEquipAttributes", js.FuncOf(core.GetUserEquipAttributes))
+	js.Global().Set("forgeEquip", js.FuncOf(core.ForgeEquip))
+	js.Global().Set("destroyEquip", js.FuncOf(core.DestroyEquip))
 }

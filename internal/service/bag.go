@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/model"
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/repo"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils"
 	"time"
 )
@@ -92,6 +93,25 @@ func addBagItem(bag *model.Bag, itemAdd *model.Item) *model.Bag {
 	return bag
 }
 
+func addBagItemByUUid(bag *model.Bag, uuid int64, count int64) *model.Bag {
+	if count == 0 {
+		return bag
+	}
+	goodsMap := repo.GetGoodsMap()
+	goodUU, ok := goodsMap[uint(uuid)]
+	if ok {
+		bag = addBagItem(bag, &model.Item{
+			UUid:        uuid,
+			Name:        goodUU.Name,
+			Description: goodUU.Description,
+			Price:       goodUU.Price,
+			Count:       count,
+			Type:        goodUU.Type,
+		})
+	}
+	return bag
+}
+
 func (s *BagService) GetBag() string {
 	bag := getLocalBag()
 	bagBytes, _ := json.Marshal(bag)
@@ -112,6 +132,7 @@ func (s *BagService) UseBagItem(id int64) string {
 	var msg string
 
 	bag := getLocalBag()
+	user := getLocalUser()
 	// 检查是否有该物品
 	var existed bool
 	for ind, item := range bag.Items {
@@ -129,7 +150,7 @@ func (s *BagService) UseBagItem(id int64) string {
 				userLog := equipItem(item.UUid, bag)
 				msg += userLog
 			} else if item.Type == model.ItemTypeMaterial { // 材料
-				useLog, _ := s.userMaterialItem(item.UUid, bag)
+				useLog, _ := s.userMaterialItem(item.UUid, user, bag)
 				msg += useLog
 			}
 			break
@@ -168,31 +189,31 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 
 	// 根据物品ID执行不同的逻辑处理
 	switch id {
-	case 1:
+	case repo.XiaPinCuiTiDanUUid:
 		msg = msg + "你的体魄上限小幅度增强了."
 		user.HpLimit += 5
 		if randInt <= 70 {
 			badThingHappened = true
 		}
-	case 2:
+	case repo.XiaPinMangNiuXueUUid:
 		msg = msg + "你的攻击力小幅度提升了."
 		user.Attack += 1
 		if randInt <= 70 {
 			badThingHappened = true
 		}
-	case 3:
+	case repo.XiaPinXuanGuiJiaUUid:
 		msg = msg + "你的防御力小幅度提升了."
 		user.Defense += 1
 		if randInt <= 70 {
 			badThingHappened = true
 		}
-	case 4:
+	case repo.XiaPinLingShePiUUid:
 		msg = msg + "你的速度小幅度提升了."
 		user.Speed += 1
 		if randInt <= 70 {
 			badThingHappened = true
 		}
-	case 5:
+	case repo.XiaoYaoSanUUid:
 		msg = msg + " 你陷入了昏迷."
 		if randInt == 50 {
 			user.Exp = user.Level*10 - 5
@@ -200,32 +221,32 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 		} else {
 			msg = msg + " 什么都没有发生."
 		}
-	case 6:
+	case repo.XiuWeiDanUUid:
 		user.Exp += 10
 		msg = msg + " 获得经验 10 点"
-	case 7:
+	case repo.YuShangDanUUid:
 		user.Hp += 15
 		if user.Hp > user.HpLimit {
 			user.Hp = user.HpLimit
 		}
-		msg = msg + " 获得生命值 15 点"
-	case 8:
+		msg = msg + " 恢复体魄值 15 点"
+	case repo.JinBiGuanZiUUid:
 		gold := utils.GetRandomInt64(1, utils.Max(user.Level, 150))
 		user.Gold += gold
 		msg = msg + "好运连连 获得金币 " + fmt.Sprint(gold) + "枚. "
-	case 9:
+	case repo.ShangPinCuiTiDanUUid:
 		msg = msg + "气息更加绵长了."
 		user.HpLimit += 10
-	case 10:
+	case repo.ShangPinMangNiuXueUUid:
 		msg = msg + "攻击变得更为凌厉了."
 		user.Attack += 2
-	case 11:
+	case repo.ShangPinXuanGuiJiaUUid:
 		msg = msg + "叠甲, 过."
 		user.Defense += 2
-	case 12:
+	case repo.ShangPinLingShePiUUid:
 		msg = msg + "脚下生风!"
 		user.Speed += 2
-	case 13:
+	case repo.HunDunQingZhuoQiUUid:
 		msg = msg + "体内的力量涌出来了. 潜能 +1 ."
 		user.Potential += 1
 		if user.RestartCount > 0 {
@@ -241,7 +262,7 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 		if user.Hp <= 0 {
 			user.Hp = 1
 		}
-		msg = msg + " 损失 " + fmt.Sprint(user.HpLimit/10) + " 点生命值. "
+		msg = msg + " 损失 " + fmt.Sprint(user.HpLimit/10) + " 点体魄值. "
 		randInt = utils.GetRandomInt64(1, 5)
 		if randInt == 1 {
 			user.HpLimit -= 6
@@ -306,28 +327,28 @@ func (s *BagService) checkGoodsLimit(user *model.User, goodsId int64) bool {
 	return true
 }
 
-func (s *BagService) userMaterialItem(uuid int64, bag *model.Bag) (string, bool) {
+func (s *BagService) userMaterialItem(uuid int64, user *model.User, bag *model.Bag) (string, bool) {
 	var (
 		msg  string
 		used bool
 	)
 
-	if uuid == 14 || uuid == 15 {
+	if uuid == repo.XuanJingUUid || uuid == repo.JingPoUUid {
 		if uuid == 14 {
-			if !s.checkBagHasItem(bag, 15) {
+			if !s.checkBagHasItem(bag, repo.JingPoUUid) {
 				msg += "你好像没有`精魄`, 合成法器失败..."
 				return msg, used
 			}
 		} else {
-			if !s.checkBagHasItem(bag, 14) {
+			if !s.checkBagHasItem(bag, repo.XuanJingUUid) {
 				msg += "你好像没有`玄晶`, 合成法器失败..."
 				return msg, used
 			}
 		}
-		bag = s.reduceItem(bag, 14)
-		bag = s.reduceItem(bag, 15)
+		bag = s.reduceItem(bag, repo.XuanJingUUid)
+		bag = s.reduceItem(bag, repo.JingPoUUid)
 		// 合成装备
-		equip := model.RandomEquip(0, 3, -1)
+		equip := model.RandomEquip(0, user.Level/6, -1)
 		if bag.RandomUUid == 0 {
 			bag.RandomUUid = time.Now().Unix()
 		}
@@ -343,6 +364,8 @@ func (s *BagService) userMaterialItem(uuid int64, bag *model.Bag) (string, bool)
 		msg += fmt.Sprintf("法器打造成功: %s", equip.GenerateDescription())
 		updateLocalBag(bag)
 
+	} else if uuid == repo.DuanTieUUid {
+		msg += " 可用来强化法器... 请在法器界面直接锻造... "
 	} else {
 		msg += " 这是仍未被发现的材料... 你还不知道怎么使用它"
 	}

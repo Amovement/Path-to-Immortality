@@ -210,7 +210,7 @@ var Goods = []model.Goods{
 	{UUid: 4, Name: "下品灵蛇皮", Type: model.ItemTypeConsume, Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
 	{UUid: 5, Name: "逍遥散", Type: model.ItemTypeConsume, Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
 	{UUid: 6, Name: "修为丹", Type: model.ItemTypeConsume, Price: 20, Description: "增加十点经验"},
-	{UUid: 7, Name: "愈伤丹", Type: model.ItemTypeConsume, Price: 20, Description: "瞬间恢复十五点生命值"},
+	{UUid: 7, Name: "愈伤丹", Type: model.ItemTypeConsume, Price: 20, Description: "瞬间恢复十五点体魄值"},
 	{UUid: 8, Name: "金币罐子", Type: model.ItemTypeConsume, Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
 	{UUid: 9, Name: "上品淬体丹", Type: model.ItemTypeConsume, Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
 	{UUid: 10, Name: "上品莽牛血", Type: model.ItemTypeConsume, Price: 5000, Description: "增加两点攻击，药效温和非常稳定,可以长期服用,但仍有限制"},
@@ -220,7 +220,27 @@ var Goods = []model.Goods{
 
 	{UUid: 14, Name: "玄晶", Type: model.ItemTypeMaterial, Price: 2500, Description: "亮晶晶的矿物, 配合上`精魄`即可打造一柄随机的法器"},
 	{UUid: 15, Name: "精魄", Type: model.ItemTypeMaterial, Price: 5000, Description: "它似乎还活着, 配合上`玄晶`即可打造一柄随机的法器"},
+	{UUid: 16, Name: "锻铁", Type: model.ItemTypeMaterial, Price: 1000, Description: "内部充满能量的铁块, 可以用来提升法器等级"},
 }
+
+const (
+	XiaPinCuiTiDanUUid     = iota + 1 // 下品淬体丹
+	XiaPinMangNiuXueUUid              // 下品莽牛血
+	XiaPinXuanGuiJiaUUid              // 下品玄龟甲
+	XiaPinLingShePiUUid               // 下品灵蛇皮
+	XiaoYaoSanUUid                    // 逍遥散
+	XiuWeiDanUUid                     // 修为丹
+	YuShangDanUUid                    // 愈伤丹
+	JinBiGuanZiUUid                   // 金币罐子
+	ShangPinCuiTiDanUUid              // 上品淬体丹
+	ShangPinMangNiuXueUUid            // 上品莽牛血
+	ShangPinXuanGuiJiaUUid            // 上品玄龟甲
+	ShangPinLingShePiUUid             // 上品灵蛇皮
+	HunDunQingZhuoQiUUid              // 混沌清浊气
+	XuanJingUUid                      // 玄晶
+	JingPoUUid                        // 精魄
+	DuanTieUUid                       // 锻铁
+)
 
 var MonsterMap map[uint]model.Monster
 var ChallengeMap map[uint]model.Challenge

@@ -73,7 +73,7 @@ function renderEquipItems(backpackData) {
         const status = item.status || null;
         let equipDescription = "";
         if (type ===1){ // 法器
-            equipDescription = "法器属性 攻击: " + equipInfo.Attack + " 防御: " + equipInfo.Defense + " 速度: " + equipInfo.Speed + " 体魄: " + equipInfo.Hp;
+            equipDescription = "等级: "+equipInfo.Level+" 攻击: " + equipInfo.Attack + " 防御: " + equipInfo.Defense + " 速度: " + equipInfo.Speed + " 体魄: " + equipInfo.Hp;
         }else{
             return  ;
         }
@@ -107,6 +107,12 @@ function renderEquipItems(backpackData) {
                     
                     ${status === 1 ? '<span class="text-green-600 text-sm px-1 py-0.5 rounded bg-green-100/30">装备中</span>' : ''}
                     <div class="mt-1 flex justify-end">
+                        <button onclick="showDestroyEquipConfirm(${id})" class="${status === 1?'hidden':''} text-gray-100 px-0.5 py-0.5 rounded hover:bg-secondary text-sm transition-colors">
+                            <i class="fa fa-plus-circle"></i> 摧毁
+                        </button>
+                        <button onclick="forgeEquipBtn(${id})" class="${status === 1?'hidden':''} text-gray-100 px-0.5 py-0.5 rounded hover:bg-secondary text-sm transition-colors">
+                            <i class="fa fa-plus-circle"></i> 强化锻造
+                        </button>
                         <button onclick="useEquipItemBtn(${id},${status})" class="text-gray-100 px-0.5 py-0.5 rounded hover:bg-secondary text-sm transition-colors">
                             <i class="fa fa-plus-circle"></i> ${status === 1 ? '卸下' : '装备'}
                         </button>
@@ -120,6 +126,14 @@ function renderEquipItems(backpackData) {
     showToast(`背包中有 ${itemCnt} 个法器`);
 }
 
+function forgeEquipBtn(uuid){
+    const result = forgeEquip(uuid);
+    showToast(result);
+    addToLog(result);
+    listEquip();
+    refreshUserInfo();
+}
+
 function useEquipItemBtn(item,status) {
     if (status ===1){
         const result = takeOffEquip(item);
@@ -131,6 +145,37 @@ function useEquipItemBtn(item,status) {
         addToLog(result);
     }
 
+    listEquip();
+    refreshUserInfo();
+}
+
+
+// 显示确认模态框
+function showDestroyEquipConfirm(uuid) {
+    const modal = document.getElementById('destroyEquipConfirmModal');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    const confirmDestroyEquipBtn = document.getElementById('confirmDestroyEquipBtn');
+    confirmDestroyEquipBtn.onclick=function(){
+        confirmDestroyEquip(uuid);
+    }
+}
+
+// 隐藏确认模态框
+function hideDestroyEquipConfirm() {
+    const modal = document.getElementById('destroyEquipConfirmModal');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+}
+
+// 确认转生（原restartBtn逻辑）
+async function confirmDestroyEquip(uuid) {
+    // 先隐藏确认框
+    hideDestroyEquipConfirm();
+
+    // 执行逻辑
+    const result = destroyEquip(uuid);
+
+    showToast(result);
+    addToLog(result);
     listEquip();
     refreshUserInfo();
 }

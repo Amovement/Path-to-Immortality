@@ -2,7 +2,10 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/model"
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/repo"
+	"math/rand"
 )
 
 type EquipService struct {
@@ -115,7 +118,7 @@ func (s *EquipService) TakeOffEquip(uuid int) string {
 
 // getUserEquipAttributes 计算并返回用户装备的总属性值
 // 该函数会遍历用户背包中的装备物品，建立装备UUID到装备信息的映射，
-// 然后根据用户已装备的装备ID列表，累加计算所有装备的属性值（攻击、防御、生命、速度），
+// 然后根据用户已装备的装备ID列表，累加计算所有装备的属性值（攻击、防御、体魄、速度），
 // 并收集所有不重复的特殊属性
 // 返回值：包含用户所有装备属性总和的Equip结构体
 func getUserEquipAttributes() model.Equip {
@@ -158,4 +161,107 @@ func (s *EquipService) GetUserEquipAttributes() string {
 	e := getUserEquipAttributes()
 	bytesE, _ := json.Marshal(e)
 	return string(bytesE)
+}
+
+// ForgeEquip 锻造
+func (s *EquipService) ForgeEquip(uuid int64) string {
+	var msg string
+	// 检查身上是否存在装备 uuid
+	var existed bool
+	var forged bool // 是否锻造成功
+	bag := getLocalBag()
+	var ironCount int64
+	for _, item := range bag.Items {
+		if item.UUid == repo.DuanTieUUid {
+			ironCount = item.Count
+		}
+	}
+	if ironCount <= 0 {
+		msg += " 背包内锻铁数量不足... "
+		return msg
+	}
+
+	for ind, item := range bag.Items {
+		if item.UUid == uuid && item.Type == model.ItemTypeEquip {
+			existed = true
+			if item.Status == model.ItemStatusEquip { // 必须卸下才能锻造
+				msg += " 装备中的法器无法锻造 请先卸下... "
+				return msg
+			} else {
+				equipSelected := bag.Items[ind].EquipInfo
+				if equipSelected == nil {
+					msg += " 获取装备失败... "
+					return msg
+				}
+				// 检查身上锻铁数量
+				if ironCount < equipSelected.Level {
+					msg += " 背包内锻铁数量不足... 当前法器锻造需要 " + fmt.Sprint(equipSelected.Level) + " 块锻铁... "
+					return msg
+				}
+				ironCount = ironCount - equipSelected.Level
+				msg += "消耗锻铁 " + fmt.Sprint(equipSelected.Level) + " 块."
+				forged = true
+
+				successRate := 100 - (equipSelected.Level * 2)
+				if rand.Int63n(100) < successRate {
+					msg += " 锻造成功了... `"
+					upgradedEquip := equipSelected.UpgradeEquip()
+					bag.Items[ind].Description = upgradedEquip.Description
+					bag.Items[ind].EquipInfo = &upgradedEquip
+					msg += upgradedEquip.Name + "` 变强了! 当前 " + fmt.Sprintf("%d 级! ", upgradedEquip.Level)
+				} else {
+					msg += " 锻造失败... 锻铁破碎了.. `"
+					msg += equipSelected.Name + "` 没有产生变化! "
+				}
+			}
+		}
+	}
+	if forged {
+		for ind, item := range bag.Items {
+			if item.UUid == repo.DuanTieUUid {
+				bag.Items[ind].Count = ironCount
+				break
+			}
+		}
+		updateLocalBag(bag)
+	}
+
+	if !existed {
+		msg += " 不存在这样的装备... "
+		return msg
+	}
+	return msg
+}
+
+// DestroyEquip 摧毁装备
+func (s *EquipService) DestroyEquip(uuid int64) string {
+	var msg string
+	var existed bool
+	// 检查身上是否存在装备 uuid
+	bag := getLocalBag()
+
+	for ind, item := range bag.Items {
+		if item.UUid == uuid && item.Type == model.ItemTypeEquip {
+			existed = true
+			if item.Status == model.ItemStatusEquip { // 必须卸下才能摧毁
+				msg += " 装备中的法器无法摧毁 请先卸下... "
+				return msg
+			} else {
+				bag.Items[ind].Count = 0
+				msg += " 摧毁了 `" + item.Name + "` "
+				bag = addBagItemByUUid(bag, repo.DuanTieUUid, item.EquipInfo.Level/2)
+				msg += "获得了 " + fmt.Sprint(item.EquipInfo.Level/2) + " 块`锻铁`材料..."
+				break
+			}
+		}
+	}
+
+	if !existed {
+		msg += " 不存在这样的装备... "
+		return msg
+	} else {
+		updateLocalBag(bag)
+	}
+
+	return msg
 }

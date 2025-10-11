@@ -36,6 +36,16 @@ func (c *Core) GetUserEquipAttributes(this js.Value, args []js.Value) interface{
 	return c.EquipService.GetUserEquipAttributes()
 }
 
+func (c *Core) ForgeEquip(this js.Value, args []js.Value) interface{} {
+	uuid := args[0].Int()
+	return c.EquipService.ForgeEquip(int64(uuid))
+}
+
+func (c *Core) DestroyEquip(this js.Value, args []js.Value) interface{} {
+	uuid := args[0].Int()
+	return c.EquipService.DestroyEquip(int64(uuid))
+}
+
 // ------------ 商品类 ---------------------
 
 func (c *Core) BuyGoods(this js.Value, args []js.Value) interface{} {
