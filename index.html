@@ -44,6 +44,23 @@
                 transform: scale(1.02);
             }
         }
+        .affix-tooltip-container {
+            position: relative;
+        }
+
+        .affix-tooltip {
+            /* 初始状态隐藏 */
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* 鼠标悬浮时显示 */
+        .affix-tooltip-container:hover .affix-tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(5px); /* 轻微上浮效果 */
+        }
     </style>
 </head>
 <body class="bg-dark-100 min-h-screen font-sans text-gray-200">
@@ -58,7 +75,7 @@
 <div class="container mx-auto px-4 py-6 max-w-6xl" id="mainContent">
     <header class="flex justify-center items-center gap-3 mb-6">
         <h1 class="text-2xl font-bold text-primary">Path to Immortality</h1>
-        <p class="text-dark-400 text-xs" id="versionTag">v1.0.0</p>
+        <p class="text-dark-400 text-xs" id="versionTag">未知版本</p>
     </header>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- 用户信息面板 -->
@@ -174,6 +191,10 @@
 
                     <button onclick="listChallengeBtn()" class="ml-auto btn btn-primary">
                         <i class="fa fa-fire"></i>挑战
+                    </button>
+
+                    <button onclick="listMythicPlusBtn()" class="ml-auto btn btn-primary">
+                        <i class="fa fa-fire"></i>秘境
                     </button>
 
                     <button onclick="openShopModal()" class="ml-auto btn btn-primary">
@@ -299,6 +320,7 @@
 <script src="js/equip.js"></script>
 <script src="js/restart.js"></script>
 <script src="js/challenge.js"></script>
+<script src="js/mythicplus.js"></script>
 <script src="js/user.js"></script>
 
 <script>
@@ -309,7 +331,7 @@
             const go = new Go();
 
             // 2. 加载WASM文件（先转为ArrayBuffer确保兼容性）
-            const response = await fetch('main-alpha-0.0.9.wasm');
+            const response = await fetch('main-alpha-0.0.10.wasm');
             if (!response.ok) {
                 throw new Error(`加载失败: ${response.status} ${response.statusText}`);
             }

@@ -7,22 +7,24 @@ import (
 )
 
 type Core struct {
-	VersionService   *service.VersionService
-	ChallengeService *service.ChallengeService
-	UserService      *service.UserService
-	GoodsService     *service.GoodsService
-	BagService       *service.BagService
-	EquipService     *service.EquipService
+	VersionService    *service.VersionService
+	ChallengeService  *service.ChallengeService
+	UserService       *service.UserService
+	GoodsService      *service.GoodsService
+	BagService        *service.BagService
+	EquipService      *service.EquipService
+	MythicPlusService *service.MythicPlusService
 }
 
 func NewCore() *Core {
 	return &Core{
-		VersionService:   service.NewVersionService(),
-		ChallengeService: service.NewChallengeService(),
-		UserService:      service.NewUserService(),
-		GoodsService:     service.NewGoodsService(),
-		BagService:       service.NewBagService(),
-		EquipService:     service.NewEquipService(),
+		VersionService:    service.NewVersionService(),
+		ChallengeService:  service.NewChallengeService(),
+		UserService:       service.NewUserService(),
+		GoodsService:      service.NewGoodsService(),
+		BagService:        service.NewBagService(),
+		EquipService:      service.NewEquipService(),
+		MythicPlusService: service.NewMythicPlusService(),
 	}
 }
 
@@ -78,6 +80,23 @@ func (c *Core) JoinChallenge(this js.Value, args []js.Value) interface{} {
 		"msg": msg,
 		"log": log,
 	}
+}
+
+func (c *Core) JoinMythic(this js.Value, args []js.Value) interface{} {
+	msg, log := c.MythicPlusService.JoinMythic()
+	return map[string]interface{}{
+		"msg": msg,
+		"log": log,
+	}
+}
+
+func (c *Core) GetMythicInfo(this js.Value, args []js.Value) interface{} {
+	return string(c.MythicPlusService.GetMythicInfo())
+}
+
+func (c *Core) LowerTheMythicPlus(this js.Value, args []js.Value) interface{} {
+	msg := c.MythicPlusService.LowerTheMythicPlus()
+	return msg
 }
 
 // ------------- user 类 -----------------
