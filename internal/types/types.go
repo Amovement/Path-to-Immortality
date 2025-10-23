@@ -91,13 +91,14 @@ type LoginResp struct {
 }
 
 type Monster struct {
-	Name        string `json:"name"`
-	Hp          int64  `json:"hp"`
-	HpLimit     int64  `json:"hpLimit"` // 最大体魄
-	Attack      int64  `json:"attack"`  // 攻击
-	Defense     int64  `json:"defense"` // 防御
-	Cultivation string `json:"level"`   // 修为, 与等级挂钩
-	Speed       int64  `json:"speed"`
+	Name        string   `json:"name"`
+	Hp          int64    `json:"hp"`
+	HpLimit     int64    `json:"hpLimit"` // 最大体魄
+	Attack      int64    `json:"attack"`  // 攻击
+	Defense     int64    `json:"defense"` // 防御
+	Cultivation string   `json:"level"`   // 修为, 与等级挂钩
+	Speed       int64    `json:"speed"`
+	Special     []string `json:"special"`
 }
 
 type RegisterReq struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/model"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/repo"
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils"
 	"math/rand"
 )
 
@@ -142,6 +143,9 @@ func getUserEquipAttributes() model.Equip {
 	// 遍历用户已装备的装备ID，累加计算装备属性总值
 	for _, equipId := range user.EquipArr {
 		equipInfo := uuid2Equip[equipId]
+		if equipInfo == nil {
+			continue
+		}
 		equipAttributes.Attack += equipInfo.Attack
 		equipAttributes.Defense += equipInfo.Defense
 		equipAttributes.Hp += equipInfo.Hp
@@ -249,8 +253,8 @@ func (s *EquipService) DestroyEquip(uuid int64) string {
 			} else {
 				bag.Items[ind].Count = 0
 				msg += " 摧毁了 `" + item.Name + "` "
-				bag = addBagItemByUUid(bag, repo.DuanTieUUid, item.EquipInfo.Level/2)
-				msg += "获得了 " + fmt.Sprint(item.EquipInfo.Level/2) + " 块`锻铁`材料..."
+				bag = addBagItemByUUid(bag, repo.DuanTieUUid, utils.Max(item.EquipInfo.Level/2, 1))
+				msg += "获得了 " + fmt.Sprint(utils.Max(item.EquipInfo.Level/2, 1)) + " 块`锻铁`材料..."
 				break
 			}
 		}

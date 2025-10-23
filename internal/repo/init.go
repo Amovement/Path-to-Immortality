@@ -12,60 +12,60 @@ var monsters = []model.Monster{
 	{ID: 3, Name: "腐气僵尸", Hp: 80, HpLimit: 80, Attack: 6, Defense: 6, Speed: 6, Level: 5},
 	{ID: 4, Name: "青面山魈", Hp: 130, HpLimit: 130, Attack: 10, Defense: 8, Speed: 8, Level: 8},
 	{ID: 5, Name: "启灵魔仆", Hp: 180, HpLimit: 180, Attack: 14, Defense: 12, Speed: 10, Level: 12},
-	{ID: 6, Name: "百年石灵", Hp: 220, HpLimit: 220, Attack: 12, Defense: 18, Speed: 4, Level: 15},
-	{ID: 7, Name: "风系小妖", Hp: 170, HpLimit: 170, Attack: 16, Defense: 6, Speed: 20, Level: 18},
-	{ID: 8, Name: "无名散修", Hp: 250, HpLimit: 250, Attack: 24, Defense: 12, Speed: 14, Level: 25},
+	{ID: 6, Name: "百年石灵", Hp: 220, HpLimit: 220, Attack: 14, Defense: 18, Speed: 10, Level: 15},
+	{ID: 7, Name: "风系小妖", Hp: 220, HpLimit: 220, Attack: 16, Defense: 18, Speed: 20, Level: 18},
+	{ID: 8, Name: "无名散修", Hp: 250, HpLimit: 250, Attack: 24, Defense: 18, Speed: 20, Level: 25},
 
 	// （31-60 级）
-	{ID: 9, Name: "筑基境傀儡", Hp: 350, HpLimit: 350, Attack: 36, Defense: 30, Speed: 16, Level: 32},
-	{ID: 10, Name: "火鸦妖王", Hp: 380, HpLimit: 380, Attack: 44, Defense: 20, Speed: 22, Level: 35},
-	{ID: 11, Name: "玄冰精怪", Hp: 440, HpLimit: 440, Attack: 32, Defense: 36, Speed: 12, Level: 40},
-	{ID: 12, Name: "金丹长老分身", Hp: 480, HpLimit: 480, Attack: 40, Defense: 32, Speed: 20, Level: 45},
-	{ID: 13, Name: "血炼魔徒", Hp: 530, HpLimit: 530, Attack: 50, Defense: 28, Speed: 16, Level: 50},
-	{ID: 14, Name: "雷纹巨猿", Hp: 580, HpLimit: 580, Attack: 60, Defense: 40, Speed: 12, Level: 55},
+	{ID: 9, Name: "筑基境傀儡", Hp: 455, HpLimit: 455, Attack: 47, Defense: 39, Speed: 23, Level: 32},
+	{ID: 10, Name: "火鸦妖王", Hp: 494, HpLimit: 494, Attack: 57, Defense: 39, Speed: 25, Level: 35},
+	{ID: 11, Name: "玄冰精怪", Hp: 572, HpLimit: 572, Attack: 57, Defense: 47, Speed: 25, Level: 40},
+	{ID: 12, Name: "金丹长老分身", Hp: 650, HpLimit: 650, Attack: 57, Defense: 52, Speed: 27, Level: 45},
+	{ID: 13, Name: "血炼魔徒", Hp: 689, HpLimit: 689, Attack: 65, Defense: 52, Speed: 27, Level: 50},
+	{ID: 14, Name: "雷纹巨猿", Hp: 754, HpLimit: 754, Attack: 78, Defense: 52, Speed: 27, Level: 55},
 
 	// （61-90 级）
-	{ID: 15, Name: "护法", Hp: 640, HpLimit: 640, Attack: 64, Defense: 44, Speed: 24, Level: 65},
-	{ID: 16, Name: "骨甲尸王", Hp: 690, HpLimit: 690, Attack: 56, Defense: 58, Speed: 16, Level: 70},
-	{ID: 17, Name: "风灵圣女", Hp: 620, HpLimit: 620, Attack: 70, Defense: 30, Speed: 34, Level: 75},
-	{ID: 18, Name: "宗门长老", Hp: 670, HpLimit: 670, Attack: 76, Defense: 40, Speed: 26, Level: 80},
-	{ID: 19, Name: "熔岩古龙", Hp: 720, HpLimit: 720, Attack: 100, Defense: 60, Speed: 14, Level: 85},
+	{ID: 15, Name: "护法", Hp: 832, HpLimit: 832, Attack: 83, Defense: 57, Speed: 27, Level: 65},
+	{ID: 16, Name: "骨甲尸王", Hp: 900, HpLimit: 900, Attack: 83, Defense: 75, Speed: 27, Level: 70},
+	{ID: 17, Name: "风灵圣女", Hp: 900, HpLimit: 900, Attack: 91, Defense: 75, Speed: 41, Level: 75},
+	{ID: 18, Name: "宗门长老", Hp: 900, HpLimit: 900, Attack: 100, Defense: 75, Speed: 41, Level: 80},
+	{ID: 19, Name: "熔岩古龙", Hp: 936, HpLimit: 936, Attack: 130, Defense: 78, Speed: 41, Level: 85},
 
 	// （91-120 级）
-	{ID: 20, Name: "上古傀儡", Hp: 800, HpLimit: 800, Attack: 90, Defense: 70, Speed: 22, Level: 95},
-	{ID: 21, Name: "玄天蛇姬", Hp: 840, HpLimit: 840, Attack: 100, Defense: 44, Speed: 36, Level: 100},
-	{ID: 22, Name: "血河老怪", Hp: 890, HpLimit: 890, Attack: 110, Defense: 50, Speed: 26, Level: 105},
-	{ID: 23, Name: "雷劫剑灵", Hp: 780, HpLimit: 780, Attack: 124, Defense: 36, Speed: 60, Level: 110},
-	{ID: 24, Name: "元婴境大长老", Hp: 930, HpLimit: 930, Attack: 116, Defense: 60, Speed: 90, Level: 115},
+	{ID: 20, Name: "上古傀儡", Hp: 1200, HpLimit: 1200, Attack: 150, Defense: 105, Speed: 41, Level: 95},
+	{ID: 21, Name: "玄天蛇姬", Hp: 1260, HpLimit: 1260, Attack: 150, Defense: 108, Speed: 43, Level: 100},
+	{ID: 22, Name: "血河老怪", Hp: 1335, HpLimit: 1335, Attack: 165, Defense: 111, Speed: 46, Level: 105},
+	{ID: 23, Name: "雷劫剑灵", Hp: 1335, HpLimit: 1335, Attack: 186, Defense: 114, Speed: 72, Level: 110},
+	{ID: 24, Name: "元婴境大长老", Hp: 1395, HpLimit: 1395, Attack: 189, Defense: 117, Speed: 96, Level: 115},
 
-	// （121-150 级） 难度巨大提升
-	{ID: 25, Name: "化神妖兽", Hp: 2000, HpLimit: 2000, Attack: 160, Defense: 76, Speed: 68, Level: 125},
-	{ID: 26, Name: "空间裂缝兽", Hp: 1920, HpLimit: 1920, Attack: 176, Defense: 60, Speed: 104, Level: 130},
-	{ID: 27, Name: "上古战魂", Hp: 2080, HpLimit: 2080, Attack: 200, Defense: 80, Speed: 72, Level: 135},
-	{ID: 28, Name: "炼虚长老分身", Hp: 2000, HpLimit: 2000, Attack: 220, Defense: 84, Speed: 80, Level: 140},
-	{ID: 29, Name: "混沌石灵", Hp: 2120, HpLimit: 2120, Attack: 240, Defense: 110, Speed: 48, Level: 145},
+	// （121-150 级）难度巨大提升
+	{ID: 25, Name: "化神妖兽", Hp: 3000, HpLimit: 3000, Attack: 240, Defense: 120, Speed: 96, Level: 125},
+	{ID: 26, Name: "空间裂缝兽", Hp: 3000, HpLimit: 3000, Attack: 264, Defense: 123, Speed: 125, Level: 130},
+	{ID: 27, Name: "上古战魂", Hp: 3120, HpLimit: 3120, Attack: 300, Defense: 126, Speed: 127, Level: 135},
+	{ID: 28, Name: "炼虚长老分身", Hp: 3120, HpLimit: 3120, Attack: 330, Defense: 129, Speed: 130, Level: 140},
+	{ID: 29, Name: "混沌石灵", Hp: 3180, HpLimit: 3180, Attack: 360, Defense: 165, Speed: 132, Level: 145},
 
-	// （151-180 级） 难度巨大提升
-	{ID: 30, Name: "魔将", Hp: 2440, HpLimit: 2440, Attack: 328, Defense: 116, Speed: 50, Level: 155},
-	{ID: 31, Name: "九天玄女", Hp: 2360, HpLimit: 2360, Attack: 340, Defense: 120, Speed: 124, Level: 160},
-	{ID: 32, Name: "万尸之主", Hp: 2560, HpLimit: 2560, Attack: 320, Defense: 156, Speed: 72, Level: 165},
-	{ID: 33, Name: "宗主化身", Hp: 2480, HpLimit: 2480, Attack: 352, Defense: 176, Speed: 96, Level: 170},
-	{ID: 34, Name: "洪荒巨兽", Hp: 2680, HpLimit: 2680, Attack: 360, Defense: 192, Speed: 60, Level: 175},
+	// （151-180 级）难度巨大提升
+	{ID: 30, Name: "魔将", Hp: 3904, HpLimit: 3904, Attack: 525, Defense: 186, Speed: 146, Level: 155},
+	{ID: 31, Name: "九天玄女", Hp: 3904, HpLimit: 3904, Attack: 544, Defense: 192, Speed: 159, Level: 160},
+	{ID: 32, Name: "万尸之主", Hp: 4100, HpLimit: 4100, Attack: 547, Defense: 248, Speed: 161, Level: 165},
+	{ID: 33, Name: "宗主化身", Hp: 4100, HpLimit: 4100, Attack: 563, Defense: 282, Speed: 164, Level: 170},
+	{ID: 34, Name: "洪荒巨兽", Hp: 4290, HpLimit: 4290, Attack: 576, Defense: 307, Speed: 169, Level: 175},
 
-	// （181-210 级） 难度巨大提升
-	{ID: 35, Name: "合体仙将", Hp: 2840, HpLimit: 2840, Attack: 392, Defense: 244, Speed: 88, Level: 185},
-	{ID: 36, Name: "灭世魔魂", Hp: 2780, HpLimit: 2780, Attack: 420, Defense: 220, Speed: 112, Level: 190},
-	{ID: 37, Name: "天道守护者", Hp: 2960, HpLimit: 2960, Attack: 400, Defense: 260, Speed: 84, Level: 195},
-	{ID: 38, Name: "圣祖", Hp: 3160, HpLimit: 3160, Attack: 432, Defense: 266, Speed: 108, Level: 200},
-	{ID: 39, Name: "混沌之影", Hp: 2920, HpLimit: 2920, Attack: 448, Defense: 268, Speed: 140, Level: 205},
+	// （181-210 级）难度巨大提升
+	{ID: 35, Name: "合体仙将", Hp: 4685, HpLimit: 4685, Attack: 647, Defense: 403, Speed: 173, Level: 185},
+	{ID: 36, Name: "灭世魔魂", Hp: 4685, HpLimit: 4685, Attack: 714, Defense: 374, Speed: 175, Level: 190},
+	{ID: 37, Name: "天道守护者", Hp: 4875, HpLimit: 4875, Attack: 721, Defense: 442, Speed: 178, Level: 195},
+	{ID: 38, Name: "圣祖", Hp: 5372, HpLimit: 5372, Attack: 734, Defense: 452, Speed: 235, Level: 200},
+	{ID: 39, Name: "混沌之影", Hp: 5372, HpLimit: 5372, Attack: 762, Defense: 456, Speed: 238, Level: 205},
 
-	// （211-250 级） 难度巨大提升
-	{ID: 40, Name: "雷劫之灵", Hp: 3120, HpLimit: 3120, Attack: 464, Defense: 272, Speed: 152, Level: 215},
-	{ID: 41, Name: "空间法则兽", Hp: 3040, HpLimit: 3040, Attack: 500, Defense: 244, Speed: 200, Level: 220},
-	{ID: 42, Name: "上古仙尊残魂", Hp: 3220, HpLimit: 3220, Attack: 528, Defense: 280, Speed: 156, Level: 225},
-	{ID: 43, Name: "渡劫天魔", Hp: 3360, HpLimit: 3360, Attack: 560, Defense: 300, Speed: 172, Level: 230},
-	{ID: 44, Name: "天道执法者", Hp: 3520, HpLimit: 3520, Attack: 608, Defense: 360, Speed: 192, Level: 240},
-	{ID: 45, Name: "鸿蒙本源兽", Hp: 3680, HpLimit: 3680, Attack: 660, Defense: 380, Speed: 220, Level: 250},
+	// （211-250 级）难度巨大提升
+	{ID: 40, Name: "雷劫之灵", Hp: 5372, HpLimit: 5372, Attack: 789, Defense: 462, Speed: 258, Level: 215},
+	{ID: 41, Name: "空间法则兽", Hp: 5372, HpLimit: 5372, Attack: 850, Defense: 468, Speed: 340, Level: 220},
+	{ID: 42, Name: "上古仙尊残魂", Hp: 5474, HpLimit: 5474, Attack: 898, Defense: 476, Speed: 347, Level: 225},
+	{ID: 43, Name: "渡劫天魔", Hp: 5712, HpLimit: 5712, Attack: 952, Defense: 510, Speed: 354, Level: 230},
+	{ID: 44, Name: "天道执法者", Hp: 6000, HpLimit: 6000, Attack: 1034, Defense: 612, Speed: 366, Level: 240},
+	{ID: 45, Name: "鸿蒙本源兽", Hp: 6256, HpLimit: 6256, Attack: 1122, Defense: 646, Speed: 374, Level: 250},
 }
 
 // Challenges 50个挑战任务（每5级一个梯度，覆盖1-250级）
@@ -209,7 +209,7 @@ var Goods = []model.Goods{
 	{UUid: 3, Name: "下品玄龟甲", Type: model.ItemTypeConsume, Price: 50, Description: "增加一点防御，存在灵力反噬风险,长期服用存在耐药性"},
 	{UUid: 4, Name: "下品灵蛇皮", Type: model.ItemTypeConsume, Price: 50, Description: "增加一点速度，存在灵力反噬风险,长期服用存在耐药性"},
 	{UUid: 5, Name: "逍遥散", Type: model.ItemTypeConsume, Price: 20, Description: "逍遥一念间，天地皆可得，有几率触发顿悟的丹药，可能会得到大量经验"},
-	{UUid: 6, Name: "修为丹", Type: model.ItemTypeConsume, Price: 20, Description: "增加十点经验"},
+	{UUid: 6, Name: "下品修为丹", Type: model.ItemTypeConsume, Price: 50, Description: "对金丹境及以下修士效果比较好的丹药, 可增加 10 点修炼经验, 高境界效果骤减"},
 	{UUid: 7, Name: "愈伤丹", Type: model.ItemTypeConsume, Price: 20, Description: "瞬间恢复十五点体魄值"},
 	{UUid: 8, Name: "金币罐子", Type: model.ItemTypeConsume, Price: 100, Description: "会获得随机数量的金币 -> Random(1, Max(Level, 150) )"},
 	{UUid: 9, Name: "上品淬体丹", Type: model.ItemTypeConsume, Price: 5000, Description: "增加十点体魄上限，药效温和非常稳定,可以长期服用,但仍有限制"},
@@ -217,10 +217,10 @@ var Goods = []model.Goods{
 	{UUid: 11, Name: "上品玄龟甲", Type: model.ItemTypeConsume, Price: 5000, Description: "增加两点防御，药效温和非常稳定,可以长期服用,但仍有限制"},
 	{UUid: 12, Name: "上品灵蛇皮", Type: model.ItemTypeConsume, Price: 5000, Description: "增加两点速度，药效温和非常稳定,可以长期服用,但仍有限制"},
 	{UUid: 13, Name: "混沌清浊气", Type: model.ItemTypeConsume, Price: 50000, Description: "会让体内的潜能躁动起来，获得一点新的潜能点，对轮回转世之人有更好的效果"},
-
 	{UUid: 14, Name: "玄晶", Type: model.ItemTypeMaterial, Price: 2500, Description: "亮晶晶的矿物, 配合上`精魄`即可打造一柄随机的法器"},
 	{UUid: 15, Name: "精魄", Type: model.ItemTypeMaterial, Price: 5000, Description: "它似乎还活着, 配合上`玄晶`即可打造一柄随机的法器"},
 	{UUid: 16, Name: "锻铁", Type: model.ItemTypeMaterial, Price: 1000, Description: "内部充满能量的铁块, 可以用来提升法器等级"},
+	{UUid: 17, Name: "上品修为丹", Type: model.ItemTypeConsume, Price: 400, Description: "对炼虚境及以下修士效果比较好的丹药, 可增加 10 点修炼经验, 高境界效果骤减"},
 }
 
 const (
@@ -229,7 +229,7 @@ const (
 	XiaPinXuanGuiJiaUUid              // 下品玄龟甲
 	XiaPinLingShePiUUid               // 下品灵蛇皮
 	XiaoYaoSanUUid                    // 逍遥散
-	XiuWeiDanUUid                     // 修为丹
+	XiaPinXiuWeiDanUUid               // 修为丹
 	YuShangDanUUid                    // 愈伤丹
 	JinBiGuanZiUUid                   // 金币罐子
 	ShangPinCuiTiDanUUid              // 上品淬体丹
@@ -240,6 +240,7 @@ const (
 	XuanJingUUid                      // 玄晶
 	JingPoUUid                        // 精魄
 	DuanTieUUid                       // 锻铁
+	ShangPinXiuWeiDanUUid             // 上品修为丹
 )
 
 var MonsterMap map[uint]model.Monster

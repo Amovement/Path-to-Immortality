@@ -7,6 +7,7 @@ import (
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/repo"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/types"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils"
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils/js"
 	"strings"
 	"time"
 )
@@ -24,14 +25,14 @@ func NewUserService() *UserService {
 // getLocalUser 获取本地用户
 func getLocalUser() *model.User {
 	user := model.NewUser()
-	userInfo, existed := utils.GetStorage(model.UserInfoStorageKey)
+	userInfo, existed := js.GetStorage(model.UserInfoStorageKey)
 	if existed {
 		if IsProd() {
 			userInfo, _ = utils.Decrypt(userInfo)
 		}
 		err := json.Unmarshal([]byte(userInfo), &user)
 		if err != nil {
-			fmt.Printf("[ERROR] %+v\n", err)
+			fmt.Printf("[ERROR] getLocalUser %+v\n", err)
 			user = model.NewUser()
 		}
 	}
@@ -45,12 +46,12 @@ func updateUserInfo(user *model.User) {
 	if IsProd() {
 		userStringEncrypted, err := utils.Encrypt(userString)
 		if err != nil {
-			fmt.Printf("[ERROR] %+v\n", err)
+			fmt.Printf("[ERROR] updateUserInfo %+v\n", err)
 			return
 		}
 		userString = userStringEncrypted
 	}
-	utils.SetStorage(model.UserInfoStorageKey, userString)
+	js.SetStorage(model.UserInfoStorageKey, userString)
 }
 
 // GetUserInfo 获取本地用户信息
@@ -123,7 +124,7 @@ func (s *UserService) Allocate(stat string) string {
 }
 
 // Heal 处理用户治疗逻辑
-// 该函数用于恢复用户血量，治疗和修炼共用时间限制
+// 该函数用于恢复用户体魄，治疗和修炼共用时间限制
 // 返回值：治疗结果的描述信息
 func (s *UserService) Heal() string {
 	key := model.UserOperatorLock // 角色属性锁
@@ -150,7 +151,7 @@ func (s *UserService) Heal() string {
 	endTime = time.Now().Add(time.Minute * 5).Unix()
 	user.NextCultivationTime = endTime
 
-	// 恢复血量上限的30%，但不超过血量上限
+	// 恢复体魄上限的30%，但不超过体魄上限
 	user.Hp = user.Hp + ((user.HpLimit+equipAttr.Hp)/10)*3
 	if user.Hp > user.HpLimit+equipAttr.Hp {
 		user.Hp = user.HpLimit + equipAttr.Hp

@@ -23,6 +23,9 @@ func RegisterUserCallbacks(core *internal.Core) {
 func RegisterChallengeCallbacks(core *internal.Core) {
 	js.Global().Set("listChallenge", js.FuncOf(core.ListChallenge))
 	js.Global().Set("joinChallenge", js.FuncOf(core.JoinChallenge))
+	js.Global().Set("joinMythic", js.FuncOf(core.JoinMythic))
+	js.Global().Set("getMythicInfo", js.FuncOf(core.GetMythicInfo))
+	js.Global().Set("lowerTheMythicPlus", js.FuncOf(core.LowerTheMythicPlus))
 }
 
 func RegisterVersionCallbacks(core *internal.Core) {

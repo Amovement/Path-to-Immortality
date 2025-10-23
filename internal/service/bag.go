@@ -6,6 +6,7 @@ import (
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/model"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/repo"
 	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils"
+	"github.com/Amovement/Path-to-Immortality-WASM/internal/utils/js"
 	"time"
 )
 
@@ -18,15 +19,16 @@ func NewBagService() *BagService {
 
 func getLocalBag() *model.Bag {
 	bag := model.NewBag()
-	bagString, existed := utils.GetStorage(model.BagStorageKey)
+	bagString, existed := js.GetStorage(model.BagStorageKey)
 	if existed {
 		if IsProd() {
 			bagString, _ = utils.Decrypt(bagString)
 		}
 		err := json.Unmarshal([]byte(bagString), &bag)
 		if err != nil {
-			fmt.Printf("[ERROR] %+v\n", err)
+			fmt.Printf("[ERROR] getLocalBag %+v\n", err)
 			bag = model.NewBag()
+			updateLocalBag(bag)
 		}
 	}
 	return bag
@@ -39,12 +41,12 @@ func updateLocalBag(bag *model.Bag) {
 	if IsProd() {
 		bagStringEncrypted, err := utils.Encrypt(bagString)
 		if err != nil {
-			fmt.Printf("[ERROR] %+v\n", err)
+			fmt.Printf("[ERROR] updateLocalBag %+v\n", err)
 			return
 		}
 		bagString = bagStringEncrypted
 	}
-	utils.SetStorage(model.BagStorageKey, bagString)
+	js.SetStorage(model.BagStorageKey, bagString)
 }
 
 // cleanBagCountZeroItem 清理背包中数量为0的物品项
@@ -221,9 +223,14 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 		} else {
 			msg = msg + " 什么都没有发生."
 		}
-	case repo.XiuWeiDanUUid:
-		user.Exp += 10
-		msg = msg + " 获得经验 10 点"
+	case repo.XiaPinXiuWeiDanUUid:
+		if user.Level > 60 {
+			msg = msg + " 你的境界已经很高了，吃这个丹药效果不明显..获得经验 1 点"
+			user.Exp += 1
+		} else {
+			user.Exp += 10
+			msg = msg + " 获得经验 10 点"
+		}
 	case repo.YuShangDanUUid:
 		user.Hp += 15
 		if user.Hp > user.HpLimit {
@@ -252,6 +259,14 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 		if user.RestartCount > 0 {
 			user.Potential = user.Potential + user.RestartCount
 			msg += "体内的另外一个灵魂正在回应你, 你好像想起来了很多东西, 额外获得了 " + fmt.Sprint(user.RestartCount) + " 点潜能"
+		}
+	case repo.ShangPinXiuWeiDanUUid:
+		if user.Level > 150 {
+			msg = msg + " 你的境界已经很高了，吃这个丹药效果不明显..获得经验 1 点"
+			user.Exp += 1
+		} else {
+			user.Exp += 10
+			msg = msg + " 获得经验 10 点"
 		}
 	}
 

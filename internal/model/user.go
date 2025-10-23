@@ -16,6 +16,14 @@ type User struct {
 	PassedChallengeId   []uint          `json:"passedChallengeId"`   // 通过的挑战 ID
 	PassedChallengeTime map[uint]string `json:"passedChallengeTime"` // 通过的 Challenge 时间
 	RestartCount        int64           `json:"restartCount"`        // 成功轮回转生的次数
+	Mythic              MythicPlus      `json:"mythic"`
+}
+
+type MythicPlus struct {
+	Level        int64      `json:"level"`
+	Monsters     []*Monster `json:"monsters"`
+	NextOpenTime int64      `json:"nextOpenTime"` // 下次可操作时间
+	Description  string     `json:"description"`
 }
 
 const (

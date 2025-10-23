@@ -1,4 +1,4 @@
-package utils
+package js
 
 import (
 	"fmt"
