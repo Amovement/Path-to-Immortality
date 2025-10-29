@@ -402,11 +402,20 @@
             toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 z-50 bg-dark-200 border border-dark-300';
         }, 5000);
     }
-
+    let logCount = 0;
     function addToLog(message) {
         const logElement = document.getElementById('challengeLog');
         const timestamp = new Date().toLocaleTimeString();
-
+        if (logCount >= 200) {
+            document.getElementById('challengeLog').innerHTML = '';
+            logCount = 0;
+            logElement.innerHTML += `
+                <div class="mb-1 pb-1 border-b border-dark-300 whitespace-pre-line">
+                    <span class="text-dark-500">[${timestamp}]</span>
+                    <span class="ml-2">日志已清空</span>
+                </div>
+            `;
+        }
         if (logElement.innerHTML.includes('暂无记录')) {
             logElement.innerHTML = '';
         }
@@ -417,7 +426,7 @@
                     <span class="ml-2">${message}</span>
                 </div>
             `;
-
+        logCount++;
         logElement.scrollTop = logElement.scrollHeight;
     }
 </script>

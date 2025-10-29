@@ -224,12 +224,17 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 			msg = msg + " 什么都没有发生."
 		}
 	case repo.XiaPinXiuWeiDanUUid:
-		if user.Level > 60 {
-			msg = msg + " 你的境界已经很高了，吃这个丹药效果不明显..获得经验 1 点"
+		if user.Exp >= user.Level*10 {
+			msg = msg + " 你的储备经验已经很多了，先去进阶一下吧..获得经验 1 点 "
 			user.Exp += 1
 		} else {
-			user.Exp += 10
-			msg = msg + " 获得经验 10 点"
+			if user.Level > 60 {
+				msg = msg + " 你的境界已经很高了，吃这个丹药效果不明显..获得经验 1 点"
+				user.Exp += 1
+			} else {
+				user.Exp += 10
+				msg = msg + " 获得经验 10 点"
+			}
 		}
 	case repo.YuShangDanUUid:
 		user.Hp += 15
@@ -261,12 +266,17 @@ func (s *BagService) useConsumeItem(id int64) (string, bool) {
 			msg += "体内的另外一个灵魂正在回应你, 你好像想起来了很多东西, 额外获得了 " + fmt.Sprint(user.RestartCount) + " 点潜能"
 		}
 	case repo.ShangPinXiuWeiDanUUid:
-		if user.Level > 150 {
-			msg = msg + " 你的境界已经很高了，吃这个丹药效果不明显..获得经验 1 点"
+		if user.Exp >= user.Level*10 {
+			msg = msg + " 你的储备经验已经很多了，先去进阶一下吧..获得经验 1 点 "
 			user.Exp += 1
 		} else {
-			user.Exp += 10
-			msg = msg + " 获得经验 10 点"
+			if user.Level > 150 {
+				msg = msg + " 你的境界已经很高了，吃这个丹药效果不明显..获得经验 1 点"
+				user.Exp += 1
+			} else {
+				user.Exp += 10
+				msg = msg + " 获得经验 10 点"
+			}
 		}
 	}
 
